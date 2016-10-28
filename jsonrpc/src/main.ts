@@ -30,8 +30,8 @@ export {
 	NotificationMessage, NotificationType,
 	NotificationType0, NotificationType1, NotificationType2, NotificationType3, NotificationType4,
 	NotificationType5, NotificationType6, NotificationType7, NotificationType8, NotificationType9,
-	MessageReader, DataCallback, StreamMessageReader, IPCMessageReader,
-	MessageWriter, StreamMessageWriter, IPCMessageWriter,
+	MessageReader, DataCallback, StreamMessageReader, IPCMessageReader, WebSocketMessageReader,
+	MessageWriter, StreamMessageWriter, IPCMessageWriter, WebSocketMessageWriter,
 	CancellationTokenSource, CancellationToken,
 	Disposable, Event, Emitter
 }

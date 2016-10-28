@@ -30,7 +30,7 @@ import {
 		NotificationHandler, NotificationHandler0, NotificationHandler1, NotificationHandler2,
 		NotificationHandler3, NotificationHandler4, NotificationHandler5, NotificationHandler6,
 		NotificationHandler7, NotificationHandler8, NotificationHandler9, GenericNotificationHandler,
-		MessageReader, IPCMessageReader, MessageWriter, IPCMessageWriter, Trace, Tracer, Event, Emitter
+		MessageReader, IPCMessageReader, WebSocketMessageReader, MessageWriter, IPCMessageWriter, WebSocketMessageWriter, Trace, Tracer, Event, Emitter
 } from 'vscode-jsonrpc';
 
 import {
