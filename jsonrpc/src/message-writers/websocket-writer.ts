@@ -3,13 +3,13 @@ import { ChildProcess } from 'child_process';
 import { AbstractMessageWriter } from './abstract-writer';
 import { MessageWriter } from './message-writer';
 import { Message } from '../messages';
-
+import { WebSocketOptions } from '../websocket-options';
 import * as SocketIOClient from 'socket.io-client';
 
 export class WebSocketMessageWriter extends AbstractMessageWriter implements MessageWriter {
-	// private process: NodeJS.Process | ChildProcess;
-	// private errorCount: number;
-
+	// private _process: NodeJS.Process | ChildProcess;
+	// private _errorCount: number;
+	private _options: WebSocketOptions;
 	public constructor(process: NodeJS.Process | ChildProcess) {
 		super();
 		// this.process = process;

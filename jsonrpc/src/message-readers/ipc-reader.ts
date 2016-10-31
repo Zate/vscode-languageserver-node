@@ -6,7 +6,6 @@ import { AbstractMessageReader } from './abstract-reader';
 import { MessageReader } from './message-reader';
 
 export class IPCMessageReader extends AbstractMessageReader implements MessageReader {
-
 	private process: NodeJS.Process | ChildProcess;
 
 	public constructor(process: NodeJS.Process | ChildProcess) {

@@ -4,12 +4,12 @@ import { Event, Emitter } from '../events';
 import { ChildProcess } from 'child_process';
 import { AbstractMessageReader } from './abstract-reader';
 import { MessageReader } from './message-reader';
-
+import { WebSocketOptions } from '../websocket-options';
 import * as SocketIOClient from 'socket.io-client';
 
 export class WebSocketMessageReader extends AbstractMessageReader implements MessageReader {
-
-	private socket: SocketIOClient.Socket;
+	private _socket: SocketIOClient.Socket;
+	private _options: WebSocketOptions;
 	public constructor(process: NodeJS.Process | ChildProcess) {
 		super();
 		this._initConnection();
@@ -28,7 +28,7 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 
 	private _initConnection() {
 		let opts = this._getConnectionOpts();
-		this.socket = SocketIOClient.connect('ws://localhost:8080/jsonrpc', opts);
+		this._socket = SocketIOClient.connect('ws://localhost:8080/jsonrpc', opts);
 
 		let messages_samples = [
 			{
@@ -44,13 +44,20 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 			}
 		];
 
-		this.socket.on('connect', () => {
+		this._socket.on('connect', () => {
 			console.log('client connected');
 
 			let jsonrpc_message = messages_samples[0];
-			this.socket.emit('jsonrpc', jsonrpc_message, (reply) => {
+			this._socket.emit('jsonrpc', jsonrpc_message, (reply) => {
 				console.log('emit:jsonrpc - reply - ', reply);
 			});
 		});
 	}
 }
+
+
+
+	onError: Event<Error>;
+	onClose: Event<void>;
+	onPartialMessage: Event<PartialMessageInfo>;
+	listen(callback: DataCallback): void;

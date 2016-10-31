@@ -234,7 +234,8 @@ export interface ForkOptions {
 
 export enum TransportKind {
 	stdio,
-	ipc
+	ipc,
+	websocket
 }
 
 export interface NodeModule {
@@ -245,7 +246,12 @@ export interface NodeModule {
 	options?: ForkOptions;
 }
 
-export type ServerOptions = Executable | { run: Executable; debug: Executable; } |  { run: NodeModule; debug: NodeModule } | NodeModule | (() => Thenable<ChildProcess | StreamInfo>);
+export type ServerOptions =
+	Executable |
+	{ run: Executable; debug: Executable; } |
+	{ run: NodeModule; debug: NodeModule } |
+	NodeModule |
+	(() => Thenable<ChildProcess | StreamInfo>);
 
 /**
  * An action to be performed when the connection is producing errors.
@@ -1089,7 +1095,9 @@ export class LanguageClient {
 				let execOptions: ExecutableOptions = Object.create(null);
 				execOptions.cwd = options.cwd || Workspace.rootPath;
 				execOptions.env = getEnvironment(options.env);
-				if (node.transport === TransportKind.ipc) {
+				if (node.transport === TransportKind.websocket) {
+					// todo(mbana): setup websocket connection
+				} else if (node.transport === TransportKind.ipc) {
 					execOptions.stdio = [null, null, null, 'ipc'];
 					args.push('--node-ipc');
 				} else if (node.transport === TransportKind.stdio) {
@@ -1110,7 +1118,9 @@ export class LanguageClient {
 			} else {
 				return new Promise<IConnection>((resolve, reject) => {
 					let args = node.args && node.args.slice() || [];
-					if (node.transport === TransportKind.ipc) {
+					if (node.transport === TransportKind.websocket) {
+						// todo(mbana): setup websocket connection
+					} else if (node.transport === TransportKind.ipc) {
 						args.push('--node-ipc');
 					} else if (node.transport === TransportKind.stdio) {
 						args.push('--stdio');

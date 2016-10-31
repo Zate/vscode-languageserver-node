@@ -7,7 +7,6 @@ import { MessageBuffer } from './message-buffer';
 import { MessageReader } from './message-reader';
 
 export class StreamMessageReader extends AbstractMessageReader implements MessageReader {
-
 	private readable: NodeJS.ReadableStream;
 	private callback: DataCallback;
 	private buffer: MessageBuffer;

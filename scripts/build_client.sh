@@ -1,18 +1,15 @@
 #!/bin/sh -x
 
-#  clone repo
-git clone git@github.com:Synthace/vscode-languageserver-node.git
+# #  clone repo
+# git clone git@github.com:Synthace/vscode-languageserver-node.git
 
-cd vscode-languageserver-node
+# cd vscode-languageserver-node
 
-# build jsonrpc module
-# then link to it
+# building just the jsonrcp module for now
 cd jsonrpc
 npm install
-npm link
 
-# build the client now
+# build the client module
 cd ../client
-npm link vscode-jsonrpc
-/Users/mbana/work/repos/Synthace/antha-editor/vsco de-languageserver-node/client/node_modules/vscode-jsonrpc -> /usr/local/lib/node_modules/vscode-jsonrpc -> /Users/mbana/work/repos/Synthace/antha-editor/vscode-languageserver-node/jsonrpc
-npm install
+npm install -f -S ../jsonrpc
+npm install -f -S ../types
