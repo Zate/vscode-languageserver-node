@@ -21,6 +21,7 @@ import { MessageReader, DataCallback, StreamMessageReader, IPCMessageReader, Web
 import { MessageWriter, StreamMessageWriter, IPCMessageWriter, WebSocketMessageWriter } from './messageWriter';
 import { Disposable, Event, Emitter } from './events';
 import { CancellationTokenSource, CancellationToken } from './cancellation';
+import { WebSocketOptions } from './websocket-options';
 
 export {
 	Message, MessageType, ErrorCodes, ResponseError,
@@ -30,8 +31,9 @@ export {
 	NotificationMessage, NotificationType,
 	NotificationType0, NotificationType1, NotificationType2, NotificationType3, NotificationType4,
 	NotificationType5, NotificationType6, NotificationType7, NotificationType8, NotificationType9,
-	MessageReader, DataCallback, StreamMessageReader, IPCMessageReader, WebSocketMessageReader,
-	MessageWriter, StreamMessageWriter, IPCMessageWriter, WebSocketMessageWriter,
+	MessageReader, DataCallback, StreamMessageReader, IPCMessageReader,
+	MessageWriter, StreamMessageWriter, IPCMessageWriter,
+	WebSocketMessageReader, WebSocketMessageWriter, WebSocketOptions,
 	CancellationTokenSource, CancellationToken,
 	Disposable, Event, Emitter
 }

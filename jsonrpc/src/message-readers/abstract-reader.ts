@@ -5,7 +5,6 @@ import * as is from '../is';
 export abstract class AbstractMessageReader {
 	private errorEmitter: Emitter<Error>;
 	private closeEmitter: Emitter<void>;
-
 	private partialMessageEmitter: Emitter<PartialMessageInfo>;
 
 	constructor() {

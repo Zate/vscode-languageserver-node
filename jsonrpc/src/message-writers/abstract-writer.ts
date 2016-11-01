@@ -3,7 +3,6 @@ import * as is from '../is';
 import { Message } from '../messages';
 
 export abstract class AbstractMessageWriter {
-
 	private errorEmitter: Emitter<[Error, Message, number]>;
 	private closeEmitter: Emitter<void>;
 

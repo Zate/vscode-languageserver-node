@@ -10,8 +10,10 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 	// private _process: NodeJS.Process | ChildProcess;
 	// private _errorCount: number;
 	private _options: WebSocketOptions;
-	public constructor(process: NodeJS.Process | ChildProcess) {
+
+	public constructor(options: WebSocketOptions) {
 		super();
+		this._options = options;
 		// this.process = process;
 		// this.errorCount = 0;
 		// this.process.on('error', (error) => this.fireError(error));

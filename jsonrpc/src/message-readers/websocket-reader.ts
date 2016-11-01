@@ -10,16 +10,21 @@ import * as SocketIOClient from 'socket.io-client';
 export class WebSocketMessageReader extends AbstractMessageReader implements MessageReader {
 	private _socket: SocketIOClient.Socket;
 	private _options: WebSocketOptions;
-	public constructor(process: NodeJS.Process | ChildProcess) {
+	private _callback: DataCallback;
+
+	public constructor(options: WebSocketOptions) {
 		super();
-		this._initConnection();
+		this._options = options;
 	}
 
 	public listen(callback: DataCallback): void {
-		// this.process.on('message', callback);
+		this._callback = callback;
+		if (this._callback) {
+			this._initConnection();
+		}
 	}
 
-	private _getConnectionOpts(): SocketIOClient.ConnectOpts {
+	private _getConnectOpts(): SocketIOClient.ConnectOpts {
 		return {
 			transports: ['websocket'],
 			upgrade: false
@@ -27,9 +32,23 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 	}
 
 	private _initConnection() {
-		let opts = this._getConnectionOpts();
-		this._socket = SocketIOClient.connect('ws://localhost:8080/jsonrpc', opts);
+		let opts = this._getConnectOpts();
+		let uri = this._getConnectUri();
+		this._socket = SocketIOClient.connect(uri, opts);
 
+		this._addCallbacks();
+	}
+
+	private _addCallbacks() {
+		if (!this._socket) {
+			return;
+		}
+
+		this._socket.on('connect', this._onConnect.bind(this));
+		this._socket.on('disconnect', this._onDisconnect.bind(this));
+	}
+
+	private _onConnect(...connectArgs) {
 		let messages_samples = [
 			{
 				'Content-Length': '',
@@ -44,20 +63,24 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 			}
 		];
 
-		this._socket.on('connect', () => {
-			console.log('client connected');
+		console.log('client connected');
 
-			let jsonrpc_message = messages_samples[0];
-			this._socket.emit('jsonrpc', jsonrpc_message, (reply) => {
-				console.log('emit:jsonrpc - reply - ', reply);
-			});
+		let jsonrpc_message = messages_samples[0];
+		this._socket.emit('jsonrpc', jsonrpc_message, (reply) => {
+			console.log('emit:jsonrpc - reply - ', reply);
 		});
 	}
+
+	private _onDisconnect(...disconnectArgs) {
+
+	}
+
+	private _getConnectUri() {
+		// returns something like: 'ws://localhost:8080/jsonrpc'
+		let { secure, host, port, namespace, path } = this._options;
+		let protocol = secure ? 'wss' : 'ws';
+
+		let uri = `${protocol}/${host}:${port}/${namespace}`;
+		return uri;
+	}
 }
-
-
-
-	onError: Event<Error>;
-	onClose: Event<void>;
-	onPartialMessage: Event<PartialMessageInfo>;
-	listen(callback: DataCallback): void;
