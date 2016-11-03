@@ -27,7 +27,8 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 	private _getConnectOpts(): SocketIOClient.ConnectOpts {
 		return {
 			transports: ['websocket'],
-			upgrade: false
+			upgrade: false,
+			path: '/ws'
 		};
 	}
 
@@ -48,18 +49,25 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 		this._socket.on('disconnect', this._onDisconnect.bind(this));
 
 		this._socket.on('connect_error', (msgs) => {
+			this.fireError(msgs);
 			console.log('WebSocketMessageReader:connect_error - ', msgs);
 		});
 		this._socket.on('connect_timeout', (msgs) => {
+			this.fireError(msgs);
 			console.log('WebSocketMessageReader:ping - ', msgs);
 		});
 		this._socket.on('ping', (msgs) => {
+			this.fireError(msgs);
 			console.log('WebSocketMessageReader:ping - ', msgs);
 		});
 		this._socket.on('pong', (msgs) => {
+			this.fireError(msgs);
 			console.log('WebSocketMessageReader:pong - ', msgs);
 		});
 	}
+
+		// this.process.on('error', (error:any) => this.fireError(error));
+		// this.process.on('close', () => this.fireClose());
 
 	private _onConnect(msgs) {
 		console.log('WebSocketMessageReader:_onConnect - ', msgs);
@@ -87,6 +95,7 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 	}
 
 	private _onDisconnect(msgs) {
+		this.fireError(msgs);
 		console.log('WebSocketMessageReader:_onDisconnect - ', msgs);
 	}
 
@@ -95,7 +104,10 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 		let { secure, host, port, namespace, path } = this._options;
 		let protocol = secure ? 'wss' : 'ws';
 
-		let uri = `${protocol}://${host}:${port}/${namespace}`;
+		// let uri = `${protocol}://${host}:${port}/${namespace}`;
+		// return uri;
+
+		let uri = `${protocol}://${host}:${port}`;
 		return uri;
 	}
 }
