@@ -17,12 +17,14 @@
   "main": "./lib/main.js",
   "typings": "./lib/main.d.ts",
   "devDependencies": {
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.42",
+    "@types/socket.io": "^1.4.27",
+    "@types/socket.io-client": "^1.4.27",
+    "bufferutil": "^1.2.1",
     "mocha": "^3.1.0",
     "typescript": "^2.0.3",
-    "@types/node": "^6.0.42",
-    "@types/mocha": "^2.2.32",
-    "@types/socket.io": "^1.4.27",
-    "@types/socket.io-client": "^1.4.27"
+    "utf-8-validate": "^1.2.1"
   },
   "scripts": {
     "prepublish": "./node_modules/.bin/tsc -p ./src",
@@ -31,6 +33,8 @@
     "test": "mocha"
   },
   "dependencies": {
-    "socket.io": "^1.0.6"
+    "bufferutil": "^1.2.1",
+    "socket.io": "^1.0.6",
+    "utf-8-validate": "^1.2.1"
   }
 }
