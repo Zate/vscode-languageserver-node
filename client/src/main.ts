@@ -1195,7 +1195,19 @@ export class LanguageClient {
 
 			process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 			this._childProcess = process;
-			return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
+
+			// let webSocketOptions: WebSocketOptions = this._createWebSocketOptions();
+			let WebSocketOptions: WebSocketOptions = {
+				secure: false,
+				host: 'localhost',
+				port: '4389',
+				namespace: 'ws',
+				path: ''
+			};
+			let webSocketConnection = this._createWebSockeConnection(options, errorHandler, closeHandler);
+
+			return Promise.resolve(webSocketConnection);
+			// return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
 		} else {
 			return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(server, null, 4)));
 		}
