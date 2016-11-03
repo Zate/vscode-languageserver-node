@@ -46,9 +46,24 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 
 		this._socket.on('connect', this._onConnect.bind(this));
 		this._socket.on('disconnect', this._onDisconnect.bind(this));
+
+		this._socket.on('connect_error', (msgs) => {
+			console.log('WebSocketMessageReader:connect_error - ', msgs);
+		});
+		this._socket.on('connect_timeout', (msgs) => {
+			console.log('WebSocketMessageReader:ping - ', msgs);
+		});
+		this._socket.on('ping', (msgs) => {
+			console.log('WebSocketMessageReader:ping - ', msgs);
+		});
+		this._socket.on('pong', (msgs) => {
+			console.log('WebSocketMessageReader:pong - ', msgs);
+		});
 	}
 
-	private _onConnect(...connectArgs) {
+	private _onConnect(msgs) {
+		console.log('WebSocketMessageReader:_onConnect - ', msgs);
+
 		let messages_samples = [
 			{
 				'Content-Length': '',
@@ -71,8 +86,8 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 		});
 	}
 
-	private _onDisconnect(...disconnectArgs) {
-
+	private _onDisconnect(msgs) {
+		console.log('WebSocketMessageReader:_onDisconnect - ', msgs);
 	}
 
 	private _getConnectUri() {
@@ -80,7 +95,7 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 		let { secure, host, port, namespace, path } = this._options;
 		let protocol = secure ? 'wss' : 'ws';
 
-		let uri = `${protocol}/${host}:${port}/${namespace}`;
+		let uri = `${protocol}://${host}:${port}/${namespace}`;
 		return uri;
 	}
 }

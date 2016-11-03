@@ -1043,7 +1043,7 @@ export class LanguageClient {
 			secure: false,
 			host: 'localhost',
 			port: '4389',
-			namespace: 'jsonrpc',
+			namespace: 'ws',
 			path: ''
 		};
 	}
