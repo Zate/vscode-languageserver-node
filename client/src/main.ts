@@ -1032,6 +1032,7 @@ export class LanguageClient {
 	}
 
 	private _createWebSockeConnection(options: WebSocketOptions, errorHandler, closeHandler): Promise<IConnection> {
+		debugger;
 			let reader = new WebSocketMessageReader(options);
 			let writer = new WebSocketMessageWriter(options);
 			return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
@@ -1197,14 +1198,14 @@ export class LanguageClient {
 			this._childProcess = process;
 
 			// let webSocketOptions: WebSocketOptions = this._createWebSocketOptions();
-			let WebSocketOptions: WebSocketOptions = {
+			let webSocketOptions: WebSocketOptions = {
 				secure: false,
 				host: 'localhost',
 				port: '4389',
 				namespace: 'ws',
 				path: ''
 			};
-			let webSocketConnection = this._createWebSockeConnection(options, errorHandler, closeHandler);
+			let webSocketConnection = this._createWebSockeConnection(webSocketOptions, errorHandler, closeHandler);
 
 			return Promise.resolve(webSocketConnection);
 			// return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
