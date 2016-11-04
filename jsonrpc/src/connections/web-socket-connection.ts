@@ -19,7 +19,26 @@ export class WebSocketConnection {
 		this.socket = SocketIOClient.connect(uri, opts);
 		this.addCallbacks();
 
-		return Promise.resolve(this.socket);
+		// resolve this.socket only when we've got a connection
+		return new Promise((resolve, reject) => {
+			this.socket.on('connect', (connect_args) => {
+				debugger;
+				return resolve(this.socket);
+			});
+
+			this.socket.on('disconnect', (err) => {
+				debugger;
+				return reject(err);
+			});
+			this.socket.on('connect_error', (err) => {
+				debugger;
+				return reject(err);
+			});
+			this.socket.on('connect_timeout', (err) => {
+				debugger;
+				return reject(err);
+			});
+		});
 	}
 
 	private getConnectOpts(): SocketIOClient.ConnectOpts {
@@ -35,18 +54,12 @@ export class WebSocketConnection {
 			return;
 		}
 
-		this.socket.on('connect', this._onConnect.bind(this));
-		this.socket.on('disconnect', this._onDisconnect.bind(this));
-		this.socket.on('connect_error', (msgs) => {
-			console.log('WebSocketMessageReader:connect_error - ', msgs);
-		});
-		this.socket.on('connect_timeout', (msgs) => {
-			console.log('WebSocketMessageReader:ping - ', msgs);
-		});
 		this.socket.on('ping', (msgs) => {
+			debugger;
 			console.log('WebSocketMessageReader:ping - ', msgs);
 		});
 		this.socket.on('pong', (msgs) => {
+			debugger;
 			console.log('WebSocketMessageReader:pong - ', msgs);
 		});
 	}

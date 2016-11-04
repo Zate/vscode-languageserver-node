@@ -22,9 +22,18 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 			return;
 		}
 
+		let errorHandler = (error:any) => {
+			debugger;
+			this.fireError(error);
+		};
+		let closeHandler = () => {
+			debugger;
+			this.fireClose();
+		};
+
 		this.errorCount = 0;
-		this.socket.on('error', (error) => this.fireError(error));
-		this.socket.on('close', () => this.fireClose);
+		this.socket.on('error', errorHandler);
+		this.socket.on('close', closeHandler);
 	}
 
 	public write(msg: Message): void {

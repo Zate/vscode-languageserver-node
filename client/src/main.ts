@@ -782,6 +782,7 @@ export class LanguageClient {
 		this._providers = [];
 		// If we restart then the diagnostics collection is reused.
 		if (!this._diagnostics) {
+			debugger;
 			this._diagnostics = this._clientOptions.diagnosticCollectionName
 				? Languages.createDiagnosticCollection(this._clientOptions.diagnosticCollectionName)
 				: Languages.createDiagnosticCollection();
@@ -1042,10 +1043,14 @@ export class LanguageClient {
 
 	private createWebSockeConnection(opts: WebSocketOptions, errorHandler, closeHandler): Promise<IConnection> {
 		let connection: WebSocketConnection = new WebSocketConnection(opts);
+		debugger;
 		return connection.listen().then(socket => {
 			let reader = new WebSocketMessageReader(socket);
 			let writer = new WebSocketMessageWriter(socket);
 			return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
+		}).catch(excep => {
+			debugger;
+			throw excep;
 		});
 	}
 
@@ -1218,8 +1223,6 @@ export class LanguageClient {
 
 			process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 			this._childProcess = process;
-
-debugger;
 
 			// this will contain settings passed down from the vscode-antha extension
 			let config: ExecutableConfiguration = command.configuration;
