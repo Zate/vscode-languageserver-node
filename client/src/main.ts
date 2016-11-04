@@ -223,10 +223,15 @@ export interface ExecutableOptions {
 	detached?: boolean;
 }
 
+export type ExecutableConfiguration = {
+	[key:string]:any;
+};
+
 export interface Executable {
 	command: string;
 	args?: string[];
 	options?: ExecutableOptions;
+	configuration?: ExecutableConfiguration;
 }
 
 export interface ForkOptions {
@@ -1031,6 +1036,10 @@ export class LanguageClient {
 		this._diagnostics.set(uri, diagnostics);
 	}
 
+	private getLanguageClientConfigurationOptions(): Configuration {
+		return this._configuration;
+	}
+
 	private _createWebSockeConnection(options: WebSocketOptions, errorHandler, closeHandler): Promise<IConnection> {
 		debugger;
 			let reader = new WebSocketMessageReader(options);
@@ -1186,6 +1195,9 @@ export class LanguageClient {
 				});
 			}
 		} else if (is.defined(json.command)) {
+			let transportKind = this.getLanguageClientConfigurationOptions();
+
+
 			let command: Executable = <Executable>json;
 			let options = command.options || {};
 			options.cwd = options.cwd || Workspace.rootPath;
