@@ -578,6 +578,8 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 	}
 
 	let callback: DataCallback = (message) => {
+		debugger;
+
 		if (isRequestMessage(message)) {
 			handleRequest(message);
 		} else if (isReponseMessage(message)) {

@@ -32,7 +32,7 @@ import {
 		NotificationHandler7, NotificationHandler8, NotificationHandler9, GenericNotificationHandler,
 		MessageReader, IPCMessageReader,
 		MessageWriter, IPCMessageWriter,
-		WebSocketMessageReader, WebSocketMessageWriter, WebSocketOptions,
+		WebSocketMessageReader, WebSocketMessageWriter, WebSocketOptions, WebSocketConnection,
 		Trace, Tracer, Event, Emitter
 } from 'vscode-jsonrpc';
 
@@ -1041,9 +1041,12 @@ export class LanguageClient {
 	}
 
 	private createWebSockeConnection(opts: WebSocketOptions, errorHandler, closeHandler): Promise<IConnection> {
-		let reader = new WebSocketMessageReader(opts);
-		let writer = new WebSocketMessageWriter(opts);
-		return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
+		let connection: WebSocketConnection = new WebSocketConnection(opts);
+		return connection.listen().then(socket => {
+			let reader = new WebSocketMessageReader(socket);
+			let writer = new WebSocketMessageWriter(socket);
+			return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
+		});
 	}
 
 	private createWebSocketOptions(config?: ExecutableConfiguration): WebSocketOptions {
