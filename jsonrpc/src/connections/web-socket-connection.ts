@@ -26,6 +26,10 @@ export class WebSocketConnection {
 				return resolve(this.socket);
 			});
 
+			this.socket.on('error', (err) => {
+				debugger;
+				return reject(err);
+			});
 			this.socket.on('disconnect', (err) => {
 				debugger;
 				return reject(err);
@@ -38,6 +42,9 @@ export class WebSocketConnection {
 				debugger;
 				return reject(err);
 			});
+
+			this.socket.open();
+			// this.socket.connect();
 		});
 	}
 
@@ -45,7 +52,8 @@ export class WebSocketConnection {
 		return {
 			transports: ['websocket'],
 			upgrade: false,
-			path: '/ws'
+			forceNew: true,
+			autoConnect: false,
 		};
 	}
 
@@ -101,7 +109,7 @@ export class WebSocketConnection {
 		// let uri = `${protocol}://${host}:${port}/${namespace}`;
 		// return uri;
 
-		let uri = `${protocol}://${host}:${port}`;
+		let uri = `${protocol}://${host}:${port}/`;
 		return uri;
 	}
 }
