@@ -18,6 +18,8 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 	}
 
 	public listen(callback: DataCallback): void {
+		debugger;
+
 		this._callback = callback;
 		if (this._callback) {
 			this._initConnection();

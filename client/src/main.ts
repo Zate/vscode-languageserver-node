@@ -1040,20 +1040,30 @@ export class LanguageClient {
 		return this._configuration;
 	}
 
-	private _createWebSockeConnection(options: WebSocketOptions, errorHandler, closeHandler): Promise<IConnection> {
-		debugger;
-			let reader = new WebSocketMessageReader(options);
-			let writer = new WebSocketMessageWriter(options);
-			return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
+	private createWebSockeConnection(opts: WebSocketOptions, errorHandler, closeHandler): Promise<IConnection> {
+		let reader = new WebSocketMessageReader(opts);
+		let writer = new WebSocketMessageWriter(opts);
+		return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
 	}
 
-	private _createWebSocketOptions(): WebSocketOptions {
+	private createWebSocketOptions(config?: ExecutableConfiguration): WebSocketOptions {
+		let secure = false;
+		let host = 'localhost';
+		let port = '4389';
+		let namespace = 'ws';
+		let path = 'path';
+
+		if (config) {
+			host = config['HOST'];
+			port = config['PORT'];
+		}
+
 		return {
-			secure: false,
-			host: 'localhost',
-			port: '4389',
-			namespace: 'ws',
-			path: ''
+			secure,
+			host,
+			port,
+			namespace,
+			path
 		};
 	}
 
@@ -1061,8 +1071,8 @@ export class LanguageClient {
 		let process = this._childProcess;
 
 		if (node.transport === TransportKind.websocket) {
-			let options: WebSocketOptions = this._createWebSocketOptions();
-			return this._createWebSockeConnection(options, errorHandler, closeHandler);
+			let options: WebSocketOptions = this.createWebSocketOptions();
+			return this.createWebSockeConnection(options, errorHandler, closeHandler);
 		} else if (node.transport === TransportKind.ipc) {
 			process.stdout.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 			return Promise.resolve(createConnection(new IPCMessageReader(process), new IPCMessageWriter(process), errorHandler, closeHandler));
@@ -1195,9 +1205,6 @@ export class LanguageClient {
 				});
 			}
 		} else if (is.defined(json.command)) {
-			let transportKind = this.getLanguageClientConfigurationOptions();
-
-
 			let command: Executable = <Executable>json;
 			let options = command.options || {};
 			options.cwd = options.cwd || Workspace.rootPath;
@@ -1209,17 +1216,20 @@ export class LanguageClient {
 			process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 			this._childProcess = process;
 
-			// let webSocketOptions: WebSocketOptions = this._createWebSocketOptions();
-			let webSocketOptions: WebSocketOptions = {
-				secure: false,
-				host: 'localhost',
-				port: '4389',
-				namespace: 'ws',
-				path: ''
-			};
-			let webSocketConnection = this._createWebSockeConnection(webSocketOptions, errorHandler, closeHandler);
+			// this will contain settings passed down from the vscode-antha extension
+			let config: ExecutableConfiguration = command.configuration;
+			let transport: string = config['TRANSPORT'];
+			let transportKind: TransportKind = TransportKind[transport];
+			if (transportKind === TransportKind.websocket) {
+				let opts = this.createWebSocketOptions(config);
+				return this.createWebSockeConnection(opts, errorHandler, closeHandler);
+			} else if (transportKind === TransportKind.ipc) {
+			} else if (transportKind === TransportKind.stdio) {
+			} else {
+				let message = `Unsupported ExecutableConfiguration ` + JSON.stringify(config);
+				return Promise.reject<IConnection>(new Error(message));
+			}
 
-			return Promise.resolve(webSocketConnection);
 			// return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
 		} else {
 			return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(server, null, 4)));
