@@ -1216,10 +1216,12 @@ export class LanguageClient {
 			process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 			this._childProcess = process;
 
+debugger;
+
 			// this will contain settings passed down from the vscode-antha extension
 			let config: ExecutableConfiguration = command.configuration;
-			let transport: string = config['TRANSPORT'];
-			let transportKind: TransportKind = TransportKind[transport];
+			let transportKind: TransportKind = config['TRANSPORT'];
+			// let transportKind: TransportKind = (<any>TransportKind)[transport];
 			if (transportKind === TransportKind.websocket) {
 				let opts = this.createWebSocketOptions(config);
 				return this.createWebSockeConnection(opts, errorHandler, closeHandler);
