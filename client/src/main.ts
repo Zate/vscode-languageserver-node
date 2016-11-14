@@ -35,6 +35,9 @@ import {
 		Trace, Tracer, Event, Emitter
 } from 'vscode-jsonrpc';
 
+// will cleanup shortly
+import * as SocketIOClient from 'socket.io-client';
+
 import {
 		Range, Position, Location, Diagnostic, DiagnosticSeverity, Command,
 		TextEdit, WorkspaceEdit, WorkspaceChange, TextEditChange,
@@ -1155,18 +1158,45 @@ export class LanguageClient {
 				});
 			}
 		} else if (is.defined(json.command)) {
-			let command: Executable = <Executable>json;
-			let options = command.options || {};
+			return this.createConnectionFromCommand(<Executable>(json), errorHandler, closeHandler, encoding);
+		}
+
+		return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(server, null, 4)));
+	}
+
+	private createConnectionFromCommand(command: Executable, errorHandler, closeHandler, encoding: string = 'utf8'): Promise<IConnection> {
+		const TRANSPORT_KEY = TransportKind.toString();
+		const ENV_DEFAULT = {
+			[TRANSPORT_KEY]: TransportKind.stdio
+		};
+
+		let options = command.options || {}
+		let env = options.env || ENV_DEFAULT;
+
+		let tranportKind = options.env[TRANSPORT_KEY];
+		if (tranportKind === TransportKind.websocket) {
+			return this.createConnectionWebSocket(errorHandler, closeHandler);
+		} else if (tranportKind === TransportKind.websocket) {
 			options.cwd = options.cwd || Workspace.rootPath;
+
 			let process = cp.spawn(command.command, command.args, command.options);
 			if (!process || !process.pid) {
 				return Promise.reject<IConnection>(`Launching server using command ${command.command} failed.`);
 			}
 			process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 			this._childProcess = process;
+
 			return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
+		} else {
+			return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(command, null, 4)));
 		}
-		return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(server, null, 4)));
+	}
+
+	private createConnectionWebSocket(errorHandler, closeHandler): Promise<IConnection> {
+		let socket: SocketIOClient.Socket;
+		let reader = new WebSocketMessageReader(socket);
+		let writer = new WebSocketMessageWriter(socket);
+		return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
 	}
 
 	private handleConnectionClosed() {
