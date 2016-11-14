@@ -30,7 +30,10 @@ import {
 		NotificationHandler, NotificationHandler0, NotificationHandler1, NotificationHandler2,
 		NotificationHandler3, NotificationHandler4, NotificationHandler5, NotificationHandler6,
 		NotificationHandler7, NotificationHandler8, NotificationHandler9, GenericNotificationHandler,
-		MessageReader, IPCMessageReader, MessageWriter, IPCMessageWriter, Trace, Tracer, Event, Emitter
+		MessageReader, IPCMessageReader,
+		MessageWriter, IPCMessageWriter,
+		WebSocketMessageReader, WebSocketMessageWriter, WebSocketOptions, WebSocketConnection,
+		Trace, Tracer, Event, Emitter
 } from 'vscode-jsonrpc';
 
 import {
@@ -167,11 +170,12 @@ function createConnection(inputStream: NodeJS.ReadableStream, outputStream: Node
 function createConnection(reader: MessageReader, writer: MessageWriter, errorHandler: ConnectionErrorHandler, closeHandler: ConnectionCloseHandler): IConnection;
 function createConnection(input: any, output: any, errorHandler: ConnectionErrorHandler, closeHandler: ConnectionCloseHandler): IConnection {
 	let logger = new ConsoleLogger();
+
 	let connection = createMessageConnection(input, output, logger);
 	connection.onError((data) => { errorHandler(data[0], data[1], data[2])});
 	connection.onClose(closeHandler);
-	let result: IConnection = {
 
+	let result: IConnection = {
 		listen: (): void => connection.listen(),
 
 		sendRequest: <R>(type: string | RPCMessageType, ...params: any[]): Thenable<R> => connection.sendRequest(type, ...params),
@@ -218,10 +222,15 @@ export interface ExecutableOptions {
 	detached?: boolean;
 }
 
+export type ExecutableConfiguration = {
+	[key:string]:any;
+};
+
 export interface Executable {
 	command: string;
 	args?: string[];
 	options?: ExecutableOptions;
+	configuration?: ExecutableConfiguration;
 }
 
 export interface ForkOptions {
@@ -233,7 +242,8 @@ export interface ForkOptions {
 
 export enum TransportKind {
 	stdio,
-	ipc
+	ipc,
+	websocket
 }
 
 export interface NodeModule {
@@ -244,7 +254,12 @@ export interface NodeModule {
 	options?: ForkOptions;
 }
 
-export type ServerOptions = Executable | { run: Executable; debug: Executable; } |  { run: NodeModule; debug: NodeModule } | NodeModule | (() => Thenable<ChildProcess | StreamInfo>);
+export type ServerOptions =
+	Executable |
+	{ run: Executable; debug: Executable; } |
+	{ run: NodeModule; debug: NodeModule } |
+	NodeModule |
+	(() => Thenable<ChildProcess | StreamInfo>);
 
 /**
  * An action to be performed when the connection is producing errors.
@@ -783,6 +798,7 @@ export class LanguageClient {
 		this._providers = [];
 		// If we restart then the diagnostics collection is reused.
 		if (!this._diagnostics) {
+			debugger;
 			this._diagnostics = this._clientOptions.diagnosticCollectionName
 				? Languages.createDiagnosticCollection(this._clientOptions.diagnosticCollectionName)
 				: Languages.createDiagnosticCollection();
@@ -1038,6 +1054,58 @@ export class LanguageClient {
 		this._diagnostics.set(uri, diagnostics);
 	}
 
+	private getLanguageClientConfigurationOptions(): Configuration {
+		return this._configuration;
+	}
+
+	private createWebSockeConnection(opts: WebSocketOptions, errorHandler, closeHandler): Promise<IConnection> {
+		let connection: WebSocketConnection = new WebSocketConnection(opts);
+		debugger;
+		return connection.listen().then(socket => {
+			let reader = new WebSocketMessageReader(socket);
+			let writer = new WebSocketMessageWriter(socket);
+			return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
+		}).catch(excep => {
+			debugger;
+			throw excep;
+		});
+	}
+
+	private createWebSocketOptions(config?: ExecutableConfiguration): WebSocketOptions {
+		let secure = false;
+		let host = 'localhost';
+		let port = '4389';
+		let namespace = 'ws';
+		let path = 'path';
+
+		if (config) {
+			host = config['HOST'];
+			port = config['PORT'];
+		}
+
+		return {
+			secure,
+			host,
+			port,
+			namespace,
+			path
+		};
+	}
+
+	private _createTransport(node: NodeModule, errorHandler: ConnectionErrorHandler, closeHandler: ConnectionCloseHandler, encoding: string = 'utf8'): Promise<IConnection> {
+		let process = this._childProcess;
+
+		if (node.transport === TransportKind.websocket) {
+			let options: WebSocketOptions = this.createWebSocketOptions();
+			return this.createWebSockeConnection(options, errorHandler, closeHandler);
+		} else if (node.transport === TransportKind.ipc) {
+			process.stdout.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
+			return Promise.resolve(createConnection(new IPCMessageReader(process), new IPCMessageWriter(process), errorHandler, closeHandler));
+		} else {
+			return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
+		}	
+	}
+
 	private createConnection(): Thenable<IConnection> {
 		function getEnvironment(env: any): any {
 			if (!env) {
@@ -1058,11 +1126,11 @@ export class LanguageClient {
 
 		let encoding = this._clientOptions.stdioEncoding || 'utf8';
 
-		let errorHandler = (error: Error, message: Message, count: number) => {
+		let errorHandler: ConnectionErrorHandler = (error: Error, message: Message, count: number) => {
 			this.handleConnectionError(error, message, count);
 		}
 
-		let closeHandler = () => {
+		let closeHandler: ConnectionCloseHandler = () => {
 			this.handleConnectionClosed();
 		}
 
@@ -1079,6 +1147,7 @@ export class LanguageClient {
 				}
 			});
 		}
+
 		let json: { command?: string; module?: string } = null;
 		let runDebug= <{ run: any; debug: any;}>server;
 		if (is.defined(runDebug.run) || is.defined(runDebug.debug)) {
@@ -1091,6 +1160,7 @@ export class LanguageClient {
 		} else {
 			json = server;
 		}
+
 		if (is.defined(json.module)) {
 			let node: NodeModule = <NodeModule>json;
 			if (node.runtime) {
@@ -1106,32 +1176,38 @@ export class LanguageClient {
 				let execOptions: ExecutableOptions = Object.create(null);
 				execOptions.cwd = options.cwd || Workspace.rootPath;
 				execOptions.env = getEnvironment(options.env);
-				if (node.transport === TransportKind.ipc) {
+				if (node.transport === TransportKind.websocket) {
+					args.push('--mode=ws');
+				} else if (node.transport === TransportKind.ipc) {
 					execOptions.stdio = [null, null, null, 'ipc'];
 					args.push('--node-ipc');
 				} else if (node.transport === TransportKind.stdio) {
 					args.push('--stdio');
 				}
+
 				let process = cp.spawn(node.runtime, args, execOptions);
 				if (!process || !process.pid) {
 					return Promise.reject<IConnection>(`Launching server using runtime ${node.runtime} failed.`);
 				}
-				this._childProcess = process;
-				process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
-				if (node.transport === TransportKind.ipc) {
-					process.stdout.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
-					return Promise.resolve(createConnection(new IPCMessageReader(process), new IPCMessageWriter(process), errorHandler, closeHandler));
-				} else {
-					return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
+
+				// don't create the child process when we're using WebSockets
+				if (node.transport !== TransportKind.websocket) {
+					this._childProcess = process;
+					process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 				}
+
+				return this._createTransport(node, errorHandler, closeHandler, encoding);
 			} else {
 				return new Promise<IConnection>((resolve, reject) => {
 					let args = node.args && node.args.slice() || [];
-					if (node.transport === TransportKind.ipc) {
+					if (node.transport === TransportKind.websocket) {
+						args.push('--mode=ws');
+					} else if (node.transport === TransportKind.ipc) {
 						args.push('--node-ipc');
 					} else if (node.transport === TransportKind.stdio) {
 						args.push('--stdio');
 					}
+
 					let options: ForkOptions = node.options || Object.create(null);
 					options.execArgv = options.execArgv || [];
 					options.cwd = options.cwd || Workspace.rootPath;
@@ -1141,7 +1217,9 @@ export class LanguageClient {
 						} else {
 							this._childProcess = cp;
 							cp.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
-							if (node.transport === TransportKind.ipc) {
+							if (node.transport === TransportKind.websocket) {
+								args.push('--websocket');
+							} else if (node.transport === TransportKind.ipc) {
 								cp.stdout.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 								resolve(createConnection(new IPCMessageReader(this._childProcess), new IPCMessageWriter(this._childProcess), errorHandler, closeHandler));
 							} else {
@@ -1159,11 +1237,28 @@ export class LanguageClient {
 			if (!process || !process.pid) {
 				return Promise.reject<IConnection>(`Launching server using command ${command.command} failed.`);
 			}
+
 			process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
 			this._childProcess = process;
-			return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
+
+			// this will contain settings passed down from the vscode-antha extension
+			let config: ExecutableConfiguration = command.configuration;
+			let transportKind: TransportKind = config['TRANSPORT'];
+			// let transportKind: TransportKind = (<any>TransportKind)[transport];
+			if (transportKind === TransportKind.websocket) {
+				let opts = this.createWebSocketOptions(config);
+				return this.createWebSockeConnection(opts, errorHandler, closeHandler);
+			} else if (transportKind === TransportKind.ipc) {
+			} else if (transportKind === TransportKind.stdio) {
+			} else {
+				let message = `Unsupported ExecutableConfiguration ` + JSON.stringify(config);
+				return Promise.reject<IConnection>(new Error(message));
+			}
+
+			// return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
+		} else {
+			return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(server, null, 4)));
 		}
-		return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(server, null, 4)));
 	}
 
 	private handleConnectionClosed() {

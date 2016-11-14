@@ -3,10 +3,14 @@
 		"target": "es6",
 		"module": "commonjs",
 		"moduleResolution": "node",
-		"sourceMap": false,
+		"sourceMap": true,
 		"inlineSources": false,
 		"declaration": true,
-		"stripInternal": true,
+		"stripInternal": false,
+		"preserveConstEnums": true,
+		"noEmitOnError": true,
+		"pretty": true,
+		"inlineSourceMap": false,
 		"lib": [ "es6" ],
 		"outDir": "../lib"
 	}

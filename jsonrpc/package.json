@@ -1,31 +1,40 @@
 {
-	"name": "vscode-jsonrpc",
-	"description": "A json rpc implementation over streams",
-	"version": "3.0.0-alpha.3",
-	"author": "Microsoft Corporation",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-languageserver-node.git"
-	},
-	"bugs": {
-		"url": "https://github.com/Microsoft/vscode-languageserver-node/issues"
-	},
-	"engines": {
-		"node": ">=4.0.0 || >=6.0.0"
-	},
-	"main": "./lib/main.js",
-	"typings": "./lib/main.d.ts",
-	"devDependencies": {
-		"mocha": "^3.1.0",
-		"typescript": "^2.0.3",
-		"@types/node": "^6.0.42",
-		"@types/mocha": "^2.2.32"
-	},
-	"scripts": {
-		"prepublish": "tsc -p ./src",
-		"compile": "tsc -p ./src",
-		"watch": "tsc -w -p ./src",
-		"test": "mocha"
-	}
+  "name": "vscode-jsonrpc",
+  "description": "A json rpc implementation over streams",
+  "version": "3.0.0-alpha.3",
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-languageserver-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-languageserver-node/issues"
+  },
+  "engines": {
+    "node": ">=4.0.0 || >=6.0.0"
+  },
+  "main": "./lib/main.js",
+  "typings": "./lib/main.d.ts",
+  "devDependencies": {
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.42",
+    "@types/socket.io": "^1.4.27",
+    "@types/socket.io-client": "^1.4.27",
+    "bufferutil": "^1.2.1",
+    "mocha": "^3.1.0",
+    "typescript": "^2.0.3",
+    "utf-8-validate": "^1.2.1"
+  },
+  "scripts": {
+    "prepublish": "./node_modules/.bin/tsc -p ./src",
+    "compile": "./node_modules/.bin/tsc -p ./src",
+    "watch": "./node_modules/.bin/tsc -w -p ./src",
+    "test": "mocha"
+  },
+  "dependencies": {
+    "bufferutil": "^1.2.1",
+    "socket.io": "^1.0.6",
+    "utf-8-validate": "^1.2.1"
+  }
 }
