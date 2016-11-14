@@ -28,6 +28,7 @@ do
 	# now build it
 	(cd $PACKAGE && \
 		yarn install && \
+		yarn run compile && \
 		(yarn link || (yarn unlink && yarn link)))
 
 	echo "---"
