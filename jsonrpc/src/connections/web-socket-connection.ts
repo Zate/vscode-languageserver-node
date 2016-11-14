@@ -12,7 +12,6 @@ export class WebSocketConnection {
 	}
 
 	public listen(): Promise<SocketIOClient.Socket> {
-
 		let opts = this.getConnectOpts();
 		let uri = this.getConnectUri();
 		this.socket = SocketIOClient.connect(uri, opts);
@@ -97,9 +96,6 @@ export class WebSocketConnection {
 		// returns something like: 'ws://localhost:8080/jsonrpc'
 		let { secure, host, port, namespace, path } = this.options;
 		let protocol = secure ? 'wss' : 'ws';
-
-		// let uri = `${protocol}://${host}:${port}/${namespace}`;
-		// return uri;
 
 		let uri = `${protocol}://${host}:${port}/`;
 		return uri;

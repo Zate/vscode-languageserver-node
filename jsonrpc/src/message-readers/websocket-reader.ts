@@ -5,28 +5,37 @@ import { ChildProcess } from 'child_process';
 import { AbstractMessageReader } from './abstract-reader';
 import { MessageReader } from './message-reader';
 import * as SocketIOClient from 'socket.io-client';
+import { Message } from '../messages';
 
 export class WebSocketMessageReader extends AbstractMessageReader implements MessageReader {
 	private socket: SocketIOClient.Socket;
+	private callback: DataCallback;
 
 	public constructor(socket: SocketIOClient.Socket) {
 		super();
 		this.socket = socket;
-
 		this.attachHandlers();
+	}
+
+	public listen(callback: DataCallback): void {
+		// store callback:
+		// - connection happens as async callback?
+		// - connection dies?
+		this.callback = callback;
+		if (this.socket) {
+			this.socket.on('message', (msg) => {
+				let data: Message = JSON.parse(msg);
+				callback(data);
+			});
+		}
 	}
 
 	private attachHandlers() {
 		if (!this.socket) {
 			return;
 		}
-
-		let errorHandler = (error:any) => {
-			this.fireError(error);
-		};
-		let closeHandler = () => {
-			this.fireClose();
-		};
+		let errorHandler = this.createErrorHandler();
+		let closeHandler = this.createCloseHandler();
 
 		this.socket.on('error', errorHandler);
 		this.socket.on('close', closeHandler);
@@ -35,11 +44,15 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 		this.socket.on('connect_timeout', errorHandler);
 	}
 
-	public listen(callback: DataCallback): void {
-		if (!this.socket) {
-			return;
-		}
+	private createErrorHandler() {
+		return (err: any): void => {
+			this.fireError(err);
+		};
+	}
 
-		this.socket.on('message', callback);
+	private createCloseHandler() {
+		return (): void => {
+			this.fireClose();
+		};
 	}
 }
