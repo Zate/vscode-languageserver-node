@@ -1,12 +1,17 @@
 {
 	"compilerOptions": {
-		"target": "es5",
+		"target": "es6",
 		"module": "commonjs",
 		"moduleResolution": "node",
-		"sourceMap": false,
+		"sourceMap": true,
+		"inlineSources": false,
 		"declaration": true,
-		"stripInternal": true,
-		"lib": [ "es5", "es2015.promise" ],
+		"stripInternal": false,
+		"preserveConstEnums": true,
+		"noEmitOnError": true,
+		"pretty": true,
+		"inlineSourceMap": false,
+		"lib": [ "es6" ],
 		"outDir": "../lib"
 	}
 }

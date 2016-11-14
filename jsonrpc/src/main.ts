@@ -17,10 +17,12 @@ import { Message, MessageType,
 	NotificationType5, NotificationType6, NotificationType7, NotificationType8, NotificationType9
 } from './messages';
 
-import { MessageReader, DataCallback, StreamMessageReader, IPCMessageReader } from './messageReader';
-import { MessageWriter, StreamMessageWriter, IPCMessageWriter } from './messageWriter';
+import { MessageReader, DataCallback, StreamMessageReader, IPCMessageReader, WebSocketMessageReader } from './messageReader';
+import { MessageWriter, StreamMessageWriter, IPCMessageWriter, WebSocketMessageWriter } from './messageWriter';
 import { Disposable, Event, Emitter } from './events';
 import { CancellationTokenSource, CancellationToken } from './cancellation';
+import { WebSocketOptions } from './websocket-options';
+import { WebSocketConnection } from './connections/web-socket-connection';
 
 export {
 	Message, MessageType, ErrorCodes, ResponseError,
@@ -32,6 +34,7 @@ export {
 	NotificationType5, NotificationType6, NotificationType7, NotificationType8, NotificationType9,
 	MessageReader, DataCallback, StreamMessageReader, IPCMessageReader,
 	MessageWriter, StreamMessageWriter, IPCMessageWriter,
+	WebSocketMessageReader, WebSocketMessageWriter, WebSocketOptions, WebSocketConnection,
 	CancellationTokenSource, CancellationToken,
 	Disposable, Event, Emitter
 }
@@ -575,6 +578,8 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 	}
 
 	let callback: DataCallback = (message) => {
+		debugger;
+
 		if (isRequestMessage(message)) {
 			handleRequest(message);
 		} else if (isReponseMessage(message)) {
