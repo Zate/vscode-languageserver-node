@@ -578,8 +578,6 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 	}
 
 	let callback: DataCallback = (message) => {
-		debugger;
-
 		if (isRequestMessage(message)) {
 			handleRequest(message);
 		} else if (isReponseMessage(message)) {
@@ -762,7 +760,8 @@ function isMessageWriter(value: any): value is MessageWriter {
 
 export function createMessageConnection(reader: MessageReader, writer: MessageWriter, logger: Logger): MessageConnection;
 export function createMessageConnection(inputStream: NodeJS.ReadableStream, outputStream: NodeJS.WritableStream, logger: Logger): MessageConnection;
-export function createMessageConnection(input: MessageReader | NodeJS.ReadableStream, output: MessageWriter | NodeJS.WritableStream, logger: Logger): MessageConnection {
+export function createMessageConnection(inputStream: WebSocketMessageReader, outputStream: WebSocketMessageWriter, logger: Logger): MessageConnection;
+export function createMessageConnection(input: MessageReader | NodeJS.ReadableStream | WebSocketMessageReader, output: MessageWriter | NodeJS.WritableStream | WebSocketMessageWriter, logger: Logger): MessageConnection {
 	let reader = isMessageReader(input) ? input : new StreamMessageReader(input);
 	let writer = isMessageWriter(output) ? output : new StreamMessageWriter(output);
 	return _createMessageConnection(reader, writer, logger);

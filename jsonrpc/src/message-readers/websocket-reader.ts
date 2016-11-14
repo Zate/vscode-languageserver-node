@@ -22,11 +22,9 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 		}
 
 		let errorHandler = (error:any) => {
-			debugger;
 			this.fireError(error);
 		};
 		let closeHandler = () => {
-			debugger;
 			this.fireClose();
 		};
 
@@ -38,8 +36,6 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 	}
 
 	public listen(callback: DataCallback): void {
-		debugger;
-
 		if (!this.socket) {
 			return;
 		}

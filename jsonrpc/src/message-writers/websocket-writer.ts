@@ -23,11 +23,9 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 		}
 
 		let errorHandler = (error:any) => {
-			debugger;
 			this.fireError(error);
 		};
 		let closeHandler = () => {
-			debugger;
 			this.fireClose();
 		};
 
