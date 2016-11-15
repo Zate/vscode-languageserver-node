@@ -1165,7 +1165,8 @@ export class LanguageClient {
 	}
 
 	private createConnectionFromCommand(command: Executable, errorHandler, closeHandler, encoding: string = 'utf8'): Promise<IConnection> {
-		const TRANSPORT_KEY = TransportKind.toString();
+		// const TRANSPORT_KEY = TransportKind.constructor.name;
+        const TRANSPORT_KEY = 'TransportKind';
 		const ENV_DEFAULT = {
 			[TRANSPORT_KEY]: TransportKind.stdio
 		};
@@ -1176,7 +1177,9 @@ export class LanguageClient {
 		let tranportKind = options.env[TRANSPORT_KEY];
 		if (tranportKind === TransportKind.websocket) {
 			return this.createConnectionWebSocket(errorHandler, closeHandler);
-		} else if (tranportKind === TransportKind.websocket) {
+		} else if (tranportKind === TransportKind.ipc) {
+			return this.createConnectionIPC(command, errorHandler, closeHandler);
+		} else if (tranportKind === TransportKind.stdio) {
 			options.cwd = options.cwd || Workspace.rootPath;
 
 			let process = cp.spawn(command.command, command.args, command.options);
@@ -1197,6 +1200,11 @@ export class LanguageClient {
 		let reader = new WebSocketMessageReader(socket);
 		let writer = new WebSocketMessageWriter(socket);
 		return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
+	}
+
+	private createConnectionIPC(command: Executable, errorHandler, closeHandler): Promise<IConnection> {
+		// TODO: Needs implementing.
+		return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(command, null, 4)));
 	}
 
 	private handleConnectionClosed() {
