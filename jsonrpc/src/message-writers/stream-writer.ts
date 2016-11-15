@@ -1,7 +1,6 @@
 import { Event, Emitter } from '../events';
 import { ChildProcess } from 'child_process';
 import { AbstractMessageWriter } from './abstract-writer';
-import { MessageBuffer } from './message-buffer';
 import { MessageWriter } from './message-writer';
 import { Message } from '../messages';
 
