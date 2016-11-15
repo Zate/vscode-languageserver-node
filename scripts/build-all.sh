@@ -7,8 +7,9 @@ set -o pipefail
 declare -a PACKAGES
 PACKAGES=(
     "types::"
-    "jsonrpc::vscode-languageserver-types"
+    "jsonrpc::"
     "client::vscode-languageserver-types vscode-jsonrpc"
+	"server::vscode-languageserver-types vscode-jsonrpc"
 )
 
 echo "---"

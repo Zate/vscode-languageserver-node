@@ -25,9 +25,6 @@
 		"vscode": "^1.0.0"
 	},
 	"dependencies": {
-		"bufferutil": "^1.2.1",
-		"socket.io": "^1.0.6",
-		"utf-8-validate": "^1.2.1",
 		"vscode-jsonrpc": "^3.0.0-alpha.2",
 		"vscode-languageserver-types": "^2.0.0-alpha.1",
 		"ws": "^1.1.1"

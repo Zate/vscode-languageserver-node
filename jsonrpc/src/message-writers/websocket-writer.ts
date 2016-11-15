@@ -36,13 +36,13 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 
 		let json = JSON.stringify(msg);
 		let contentLength = Buffer.byteLength(json, encoding);
-
-		let rpc: string = ([
+		let contents: string[] = [
 			CONTENT_LENGTH, contentLength.toString(), CRLF,
 			CRLF,
 			json
-		]).join('');
+		];
 
+		let rpc: string = contents.join('');
 		return rpc;
 	}
 
