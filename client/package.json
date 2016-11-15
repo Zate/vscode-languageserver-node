@@ -17,18 +17,20 @@
 	"main": "./lib/main.js",
 	"typings": "./lib/main",
 	"devDependencies": {
-		"typescript": "^2.0.3",
-		"vscode": "^1.0.0",
 		"@types/node": "^6.0.42",
 		"@types/socket.io": "^1.4.27",
-		"@types/socket.io-client": "^1.4.27"
+		"@types/socket.io-client": "^1.4.27",
+		"@types/ws": "^0.0.36",
+		"typescript": "^2.0.3",
+		"vscode": "^1.0.0"
 	},
 	"dependencies": {
 		"bufferutil": "^1.2.1",
 		"socket.io": "^1.0.6",
 		"utf-8-validate": "^1.2.1",
 		"vscode-jsonrpc": "^3.0.0-alpha.2",
-		"vscode-languageserver-types": "^2.0.0-alpha.1"
+		"vscode-languageserver-types": "^2.0.0-alpha.1",
+		"ws": "^1.1.1"
 	},
 	"scripts": {
 		"prepublish": "node ./node_modules/vscode/bin/install && ./node_modules/.bin/tsc -p ./src",
