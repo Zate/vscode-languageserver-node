@@ -36,9 +36,6 @@ import {
 		Trace, Tracer, Event, Emitter
 } from 'vscode-jsonrpc';
 
-// will cleanup shortly
-import * as SocketIOClient from 'socket.io-client';
-
 import {
 		Range, Position, Location, Diagnostic, DiagnosticSeverity, Command,
 		TextEdit, WorkspaceEdit, WorkspaceChange, TextEditChange,
@@ -1046,16 +1043,16 @@ export class LanguageClient {
 		this._diagnostics.set(uri, diagnostics);
 	}
 
-	private createConnection(): Thenable<IConnection> {
-		function getEnvironment(env: any): any {
-			if (!env) {
-				return process.env;
-			}
-			let result: any = Object.create(null);
-			Object.keys(process.env).forEach(key => result[key] = process.env[key]);
-			Object.keys(env).forEach(key => result[key] = env[key]);
+	private getEnvironment(env: any): any {
+		if (!env) {
+			return process.env;
 		}
+		let result: any = Object.create(null);
+		Object.keys(process.env).forEach(key => result[key] = process.env[key]);
+		Object.keys(env).forEach(key => result[key] = env[key]);
+	}
 
+	private createConnection(): Thenable<IConnection> {
 		function startedInDebugMode(): boolean {
 			let args = (process as any).execArgv;
 			if (args) {
@@ -1113,7 +1110,7 @@ export class LanguageClient {
 				}
 				let execOptions: ExecutableOptions = Object.create(null);
 				execOptions.cwd = options.cwd || Workspace.rootPath;
-				execOptions.env = getEnvironment(options.env);
+				execOptions.env = this.getEnvironment(options.env);
 				if (node.transport === TransportKind.ipc) {
 					execOptions.stdio = [null, null, null, 'ipc'];
 					args.push('--node-ipc');
@@ -1167,42 +1164,56 @@ export class LanguageClient {
 	}
 
 	private createConnectionFromCommand(command: Executable, errorHandler, closeHandler, encoding: string = 'utf8'): Promise<IConnection> {
+		command.options = command.options || {}
+		command.options.env = command.options.env || {};
+
 		// const TRANSPORT_KEY = TransportKind.constructor.name;
         const TRANSPORT_KEY = 'TransportKind';
-		const ENV_DEFAULT = {
-			[TRANSPORT_KEY]: TransportKind.stdio
-		};
+		let transportKind = TransportKind.stdio;
+		if (command.options.env && command.options.env[TRANSPORT_KEY]) {
+			transportKind = command.options.env[TRANSPORT_KEY];
+		}
 
-		let options = command.options || {}
-		let env = options.env || ENV_DEFAULT;
+		command.options.env = this.getEnvironment({});
 
-		let tranportKind = options.env[TRANSPORT_KEY];
-		if (tranportKind === TransportKind.websocket) {
-			return Connections.newWebSocket().then(conn => {
-				let { reader, writer } = conn;
+		if (transportKind === TransportKind.websocket) {
+            return this.spawnCommand(command, encoding)
+				.then(process => {
+					this._childProcess = process;
+					return process;
+				}).then(process => {
+					return Connections.newWebSocket();
+				}).then(({ reader, writer }) => {
+					return createConnection(reader, writer, errorHandler, closeHandler)
+				});
+		} else if (transportKind === TransportKind.ipc) {
+			return Connections.newIPC(command).then(({ reader, writer }) => {
 				return createConnection(reader, writer, errorHandler, closeHandler);
 			});
-		} else if (tranportKind === TransportKind.ipc) {
-			return Connections.newIPC(command).then(conn => {
-				let { reader, writer } = conn;
-				return createConnection(reader, writer, errorHandler, closeHandler);
+		} else if (transportKind === TransportKind.stdio) {
+			return this.spawnCommand(command, encoding).then(process => {
+				this._childProcess = process;
+				return createConnection(process.stdout, process.stdin, errorHandler, closeHandler)
 			});
-		} else if (tranportKind === TransportKind.stdio) {
-			options.cwd = options.cwd || Workspace.rootPath;
-
-			let process = cp.spawn(command.command, command.args, command.options);
-			if (!process || !process.pid) {
-				return Promise.reject<IConnection>(`Launching server using command ${command.command} failed.`);
-			}
-			process.stderr.on('data', data => this.outputChannel.append(is.string(data) ? data : data.toString(encoding)));
-			this._childProcess = process;
-
-			return Promise.resolve(createConnection(process.stdout, process.stdin, errorHandler, closeHandler));
 		} else {
 			return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(command, null, 4)));
 		}
 	}
 
+    private spawnCommand(command: Executable, encoding: string = 'utf8'): Promise<cp.ChildProcess> {
+        let options = command.options;
+        options.cwd = options.cwd || Workspace.rootPath;
+
+        let process = cp.spawn(command.command, command.args, options);
+        if (!process || !process.pid) {
+            return Promise.reject<cp.ChildProcess>(`Launching server using command ${command.command} failed.`);
+        }
+
+        process.stderr.on('data', data => {
+            this.outputChannel.append(is.string(data) ? data : data.toString(encoding))
+        });
+		return Promise.resolve(process);
+    }
 
 	private handleConnectionClosed() {
 		// Check whether this is a normal shutdown in progress or the client stopped normally.

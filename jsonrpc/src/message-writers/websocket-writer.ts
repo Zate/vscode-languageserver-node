@@ -3,29 +3,25 @@ import { ChildProcess } from 'child_process';
 import { AbstractMessageWriter } from './abstract-writer';
 import { MessageWriter } from './message-writer';
 import { Message } from '../messages';
-import * as SocketIOClient from 'socket.io-client';
+import * as WebSocket from 'ws';
 
 export class WebSocketMessageWriter extends AbstractMessageWriter implements MessageWriter {
 	private errorCount: number;
-	private socket: SocketIOClient.Socket;
+	private ws: WebSocket;
 
-	public constructor(socket: SocketIOClient.Socket) {
+	public constructor(ws: WebSocket) {
 		super();
-		this.socket = socket;
+		this.ws = ws;
 		this.attachHandlers();
 	}
 
 	public write(msg: Message): void {
-		if (!this.socket) {
-			return;
-		}
-
 		try {
 			// let event: string = '';
 			// let args: any[] = [msg];
 			// this.socket.emit(event, args);
 
-			this.socket.send(this.toRpc(msg));
+			this.ws.send(this.toRpc(msg));
 			// this.errorCount = 0;
 		} catch (error) {
 			this.errorCount++;
@@ -51,16 +47,12 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 	}
 
 	private attachHandlers() {
-		if (!this.socket) {
-			return;
-		}
-
 		let errorHandler = this.createErrorHandler();
 		let closeHandler = this.createCloseHandler();
 
 		this.errorCount = 0;
-		this.socket.on('error', errorHandler);
-		this.socket.on('close', closeHandler);
+		this.ws.on('error', errorHandler);
+		this.ws.on('close', closeHandler);
 	}
 
 	private createErrorHandler() {

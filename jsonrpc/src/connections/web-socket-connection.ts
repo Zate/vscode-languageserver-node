@@ -1,6 +1,6 @@
 import { Event, Emitter } from '../events';
 import { ChildProcess } from 'child_process';
-import * as SocketIOClient from 'socket.io-client';
+import * as WebSocket from 'ws';
 
 export interface WebSocketConnectionOptions {
 	// possibly provide an option to spawn
@@ -14,59 +14,24 @@ export interface WebSocketConnectionOptions {
 }
 
 export class WebSocketConnection {
-	private socket: SocketIOClient.Socket;
+	private ws: WebSocket;
 	private options: WebSocketConnectionOptions;
 
 	public constructor(options: WebSocketConnectionOptions) {
 		this.options = options;
 	}
 
-	public listen(): Promise<SocketIOClient.Socket> {
-		let opts = this.getConnectOpts();
+	public listen(): Promise<WebSocket> {
 		let uri = this.getConnectUri();
 
-		this.socket = SocketIOClient.connect(uri, opts);
-		this.addCallbacks();
+		this.ws = new WebSocket(uri);
+		this.attachHandlers();
 
 		// resolve this.socket only when we've got a connection
 		return new Promise((resolve, reject) => {
-			this.socket.on('connect', (connect_args) => {
-				resolve(this.socket);
+			this.ws.on('open', () => {
+				resolve(this.ws);
 			});
-
-			this.socket.on('error', (err) => {
-				reject(err);
-			});
-			this.socket.on('disconnect', (err) => {
-				reject(err);
-			});
-			this.socket.on('connect_error', (err) => {
-				reject(err);
-			});
-			this.socket.on('connect_timeout', (err) => {
-				reject(err);
-			});
-
-			this.socket.open();
-			// this.socket.connect();
-		});
-	}
-
-	private getConnectOpts(): SocketIOClient.ConnectOpts {
-		return {
-			transports: ['websocket'],
-			upgrade: false,
-			forceNew: true,
-			autoConnect: false
-		};
-	}
-
-	private addCallbacks() {
-		this.socket.on('ping', (msgs) => {
-			console.log('WebSocketMessageReader:ping - ', msgs);
-		});
-		this.socket.on('pong', (msgs) => {
-			console.log('WebSocketMessageReader:pong - ', msgs);
 		});
 	}
 
@@ -77,5 +42,25 @@ export class WebSocketConnection {
 
 		let uri = `${protocol}://${host}:${port}/`;
 		return uri;
+	}
+
+	private attachHandlers() {
+		let errorHandler = this.createErrorHandler();
+		let closeHandler = this.createCloseHandler();
+
+		this.ws.on('error', errorHandler);
+		this.ws.on('close', closeHandler);
+	}
+
+	private createErrorHandler() {
+		return (err: any): void => {
+			// this.fireError(err);
+		};
+	}
+
+	private createCloseHandler() {
+		return (): void => {
+			// this.fireClose();
+		};
 	}
 }

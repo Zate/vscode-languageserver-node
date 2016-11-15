@@ -3,7 +3,7 @@ import {
     MessageWriter, WebSocketMessageWriter,
     WebSocketConnectionOptions, WebSocketConnection
 } from 'vscode-jsonrpc';
-import * as SocketIOClient from 'socket.io-client';
+import * as WebSocket from 'ws';
 
 export type ConnectionDuplex = {
     reader: MessageReader,
@@ -15,9 +15,9 @@ export class Connections {
     }
 
     public static newWebSocket(): Promise<ConnectionDuplex> {
-        return this.newWebSocketConnection().listen().then((socket: SocketIOClient.Socket) => {
-            let reader = new WebSocketMessageReader(socket);
-            let writer = new WebSocketMessageWriter(socket);
+        return this.newWebSocketConnection().listen().then((ws: WebSocket) => {
+            let reader = new WebSocketMessageReader(ws);
+            let writer = new WebSocketMessageWriter(ws);
 
             return {
                 reader,
@@ -25,7 +25,6 @@ export class Connections {
             };
         });
     }
-
 
     public static newIPC(command: any): Promise<ConnectionDuplex> {
         // TODO: Needs implementing.
