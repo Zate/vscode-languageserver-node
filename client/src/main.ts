@@ -32,6 +32,7 @@ import {
 		NotificationHandler7, NotificationHandler8, NotificationHandler9, GenericNotificationHandler,
 		MessageReader, IPCMessageReader, WebSocketMessageReader,
 		MessageWriter, IPCMessageWriter, WebSocketMessageWriter,
+		WebSocketConnectionOptions, WebSocketConnection,
 		Trace, Tracer, Event, Emitter
 } from 'vscode-jsonrpc';
 
@@ -80,6 +81,7 @@ import {
 
 import * as c2p from './codeConverter';
 import * as p2c from './protocolConverter';
+import { Connections } from './connections/connections';
 
 import * as is from './utils/is';
 import * as electron from './utils/electron';
@@ -1176,9 +1178,15 @@ export class LanguageClient {
 
 		let tranportKind = options.env[TRANSPORT_KEY];
 		if (tranportKind === TransportKind.websocket) {
-			return this.createConnectionWebSocket(errorHandler, closeHandler);
+			return Connections.newWebSocket().then(conn => {
+				let { reader, writer } = conn;
+				return createConnection(reader, writer, errorHandler, closeHandler);
+			});
 		} else if (tranportKind === TransportKind.ipc) {
-			return this.createConnectionIPC(command, errorHandler, closeHandler);
+			return Connections.newIPC(command).then(conn => {
+				let { reader, writer } = conn;
+				return createConnection(reader, writer, errorHandler, closeHandler);
+			});
 		} else if (tranportKind === TransportKind.stdio) {
 			options.cwd = options.cwd || Workspace.rootPath;
 
@@ -1195,17 +1203,6 @@ export class LanguageClient {
 		}
 	}
 
-	private createConnectionWebSocket(errorHandler, closeHandler): Promise<IConnection> {
-		let socket: SocketIOClient.Socket;
-		let reader = new WebSocketMessageReader(socket);
-		let writer = new WebSocketMessageWriter(socket);
-		return Promise.resolve(createConnection(reader, writer, errorHandler, closeHandler));
-	}
-
-	private createConnectionIPC(command: Executable, errorHandler, closeHandler): Promise<IConnection> {
-		// TODO: Needs implementing.
-		return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(command, null, 4)));
-	}
 
 	private handleConnectionClosed() {
 		// Check whether this is a normal shutdown in progress or the client stopped normally.
