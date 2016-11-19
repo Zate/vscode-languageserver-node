@@ -8,43 +8,35 @@ import { Message } from '../messages';
 import * as WebSocket from 'ws';
 
 export class WebSocketMessageReader extends AbstractMessageReader implements MessageReader {
-	private ws: WebSocket;
+	private socket: WebSocket;
 	private callback: DataCallback;
 
-	public constructor(ws: WebSocket) {
+	public constructor(socket: WebSocket) {
 		super();
-		this.ws = ws;
+		this.socket = socket;
 		this.attachHandlers();
 	}
 
 	public listen(callback: DataCallback): void {
 		this.callback = callback;
-
-		if (this.ws) {
-			this.ws.on('message', (data: any, flags: { binary: boolean }) => {
-				let msg: Message = JSON.parse(data);
-				callback(msg);
-			});
-		}
 	}
 
 	private attachHandlers() {
-		let errorHandler = this.createErrorHandler();
-		let closeHandler = this.createCloseHandler();
+		this.socket.on('message', (data: any) => {
+			if (!this.callback) {
+				return;
+			}
 
-		this.ws.on('error', errorHandler);
-		this.ws.on('close', closeHandler);
-	}
+			let CRLF = '\r\n';
+			let SEPARATOR = `${CRLF}${CRLF}`;
 
-	private createErrorHandler() {
-		return (err: any): void => {
-			this.fireError(err);
-		};
-	}
+			let response: string[] = data.split(SEPARATOR, 2);
+			let headers = response[0];
+			let json = response[1];
 
-	private createCloseHandler() {
-		return (): void => {
-			this.fireClose();
-		};
+			// let msg: Message = JSON.parse(json);
+			let msg = JSON.parse(json);
+			this.callback(msg);
+		});
 	}
 }

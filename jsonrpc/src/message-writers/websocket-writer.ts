@@ -1,44 +1,36 @@
-import { Event, Emitter } from '../events';
-import { ChildProcess } from 'child_process';
 import { AbstractMessageWriter } from './abstract-writer';
 import { MessageWriter } from './message-writer';
 import { Message } from '../messages';
 import * as WebSocket from 'ws';
 
 export class WebSocketMessageWriter extends AbstractMessageWriter implements MessageWriter {
-	private errorCount: number;
-	private ws: WebSocket;
+	private errorCount: number = 0;
+	private socket: WebSocket;
 
-	public constructor(ws: WebSocket) {
+	public constructor(socket: WebSocket) {
 		super();
-		this.ws = ws;
-		this.attachHandlers();
+		this.socket = socket;
 	}
 
 	public write(msg: Message): void {
-		try {
-			// let event: string = '';
-			// let args: any[] = [msg];
-			// this.socket.emit(event, args);
+		let json: string = JSON.stringify(msg);
+		let data = this.toRpc(json);
+		let options = {
+			mask: true,
+			binary: false
+		};
 
-			this.ws.send(this.toRpc(msg));
-			// this.errorCount = 0;
-		} catch (error) {
-			this.errorCount++;
-			this.fireError(error, msg, this.errorCount);
-		}
+		this.socket.send(data);
 	}
 
-	private toRpc(msg: Message) {
+	private toRpc(json: string) {
 		const CONTENT_LENGTH: string = 'Content-Length: ';
 		const CRLF = '\r\n';
 		let encoding = 'utf-8';
 
-		let json = JSON.stringify(msg);
 		let contentLength = Buffer.byteLength(json, encoding);
 		let contents: string[] = [
-			CONTENT_LENGTH, contentLength.toString(), CRLF,
-			CRLF,
+			CONTENT_LENGTH, contentLength.toString(), CRLF, CRLF,
 			json
 		];
 
@@ -46,24 +38,14 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 		return rpc;
 	}
 
-	private attachHandlers() {
-		let errorHandler = this.createErrorHandler();
-		let closeHandler = this.createCloseHandler();
-
-		this.errorCount = 0;
-		this.ws.on('error', errorHandler);
-		this.ws.on('close', closeHandler);
-	}
-
-	private createErrorHandler() {
-		return (err: any): void => {
-			this.fireError(err);
+	private doSend(msg: Message) {
+		let json: string = JSON.stringify(msg);
+		let data = this.toRpc(json);
+		let options = {
+			mask: true,
+			binary: false
 		};
-	}
 
-	private createCloseHandler() {
-		return (): void => {
-			this.fireClose();
-		};
+		this.socket.send(data);
 	}
 }

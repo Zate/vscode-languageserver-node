@@ -11,6 +11,11 @@
 		"noEmitOnError": true,
 		"pretty": true,
 		"inlineSourceMap": false,
+
+		"removeComments": false,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+
 		"lib": [ "es6" ],
 		"outDir": "../lib"
 	}
