@@ -30,9 +30,8 @@ import {
 		NotificationHandler, NotificationHandler0, NotificationHandler1, NotificationHandler2,
 		NotificationHandler3, NotificationHandler4, NotificationHandler5, NotificationHandler6,
 		NotificationHandler7, NotificationHandler8, NotificationHandler9, GenericNotificationHandler,
-		MessageReader, IPCMessageReader, WebSocketMessageReader,
-		MessageWriter, IPCMessageWriter, WebSocketMessageWriter,
-		WebSocketConnectionOptions, WebSocketConnection,
+		MessageReader, IPCMessageReader,
+		MessageWriter, IPCMessageWriter,
 		Trace, Tracer, Event, Emitter
 } from 'vscode-jsonrpc';
 
@@ -225,6 +224,7 @@ export interface ExecutableOptions {
 export interface Executable {
 	command: string;
 	args?: string[];
+	transport?: TransportKind;
 	options?: ExecutableOptions;
 }
 
@@ -239,6 +239,35 @@ export enum TransportKind {
 	stdio,
 	ipc,
 	websocket
+}
+export type TransportKindValues = 'stdio' | 'ipc' | 'websocket';
+export namespace TransportKind {
+	export function fromString(value: string): TransportKind {
+		value = value.toLowerCase();
+		switch (value) {
+			case 'stdio':
+				return TransportKind.stdio;
+			case 'ipc':
+				return TransportKind.ipc;
+			case 'websocket':
+				return TransportKind.websocket;
+			default:
+				return TransportKind.stdio;
+		}
+	}
+
+	export function toString(value: TransportKind): TransportKindValues {
+		switch (value) {
+			case TransportKind.stdio:
+				return 'stdio';
+			case TransportKind.ipc:
+				return 'ipc';
+			case TransportKind.websocket:
+				return 'websocket';
+			default:
+				return 'stdio';
+		}
+ 	}
 }
 
 export interface NodeModule {
@@ -1164,34 +1193,33 @@ export class LanguageClient {
 	}
 
 	private createConnectionFromCommand(command: Executable, errorHandler, closeHandler, encoding: string = 'utf8'): Promise<IConnection> {
+		command.transport = command.transport || TransportKind.stdio;
 		command.options = command.options || {}
-		command.options.env = command.options.env || {};
+		command.options.env = command.options.env || this.getEnvironment({});
 
-		// const TRANSPORT_KEY = TransportKind.constructor.name;
-        const TRANSPORT_KEY = 'TransportKind';
-		let transportKind = TransportKind.stdio;
-		if (command.options.env && command.options.env[TRANSPORT_KEY]) {
-			transportKind = command.options.env[TRANSPORT_KEY];
-		}
+		return this.createConnectionFromKind(command, errorHandler, closeHandler, encoding);
+	}
 
-		command.options.env = this.getEnvironment({});
+	private createConnectionFromKind(command: Executable, errorHandler, closeHandler, encoding: string = 'utf8'): Promise<IConnection> {
+		let transportKind = command.transport;
 
 		if (transportKind === TransportKind.websocket) {
-            return this.spawnCommand(command, encoding)
-				.then(process => {
-					this._childProcess = process;
-					return process;
-				}).then(process => {
+			return this.spawnCommand(command, encoding)
+				.then((childProcess) => {
+					this._childProcess = childProcess;
+					return childProcess;
+				}).then((childProcess) => {
 					return Connections.newWebSocket();
 				}).then(({ reader, writer }) => {
-					return createConnection(reader, writer, errorHandler, closeHandler)
+					return createConnection(reader, writer, errorHandler, closeHandler);
 				});
 		} else if (transportKind === TransportKind.ipc) {
-			return Connections.newIPC(command).then(({ reader, writer }) => {
-				return createConnection(reader, writer, errorHandler, closeHandler);
-			});
+			return Promise.reject<IConnection>(new Error(`Unsupported server configuartion ` + JSON.stringify(command, null, 4)));
+			// return Connections.newIPC(command).then(({ reader, writer }) => {
+			// 	return createConnection(reader, writer, errorHandler, closeHandler);
+			// });
 		} else if (transportKind === TransportKind.stdio) {
-			return this.spawnCommand(command, encoding).then(process => {
+			return this.spawnCommand(command, encoding).then((process) => {
 				this._childProcess = process;
 				return createConnection(process.stdout, process.stdin, errorHandler, closeHandler)
 			});
@@ -1201,19 +1229,39 @@ export class LanguageClient {
 	}
 
     private spawnCommand(command: Executable, encoding: string = 'utf8'): Promise<cp.ChildProcess> {
-        let options = command.options;
-        options.cwd = options.cwd || Workspace.rootPath;
+		let options = command.options;
+		options.cwd = options.cwd || Workspace.rootPath;
 
-        let process = cp.spawn(command.command, command.args, options);
-        if (!process || !process.pid) {
-            return Promise.reject<cp.ChildProcess>(`Launching server using command ${command.command} failed.`);
-        }
+		return new Promise((resolve, reject) => {
+			let errorHandler = (err) => {
+				let msg = `Launching server using command ${command.command} failed - close ${err}`;
+				return reject(msg);
+			};
 
-        process.stderr.on('data', data => {
-            this.outputChannel.append(is.string(data) ? data : data.toString(encoding))
-        });
-		return Promise.resolve(process);
-    }
+			let process = cp.spawn(command.command, command.args, options);
+
+			process.on('error', (err) => {
+				reject(err);
+			});
+			process.on('close', (err) => {
+				reject(err);
+			});
+
+			process.stdout.on('data', (data) => {
+				this.outputChannel.append(is.string(data) ? data : data.toString(encoding))
+			});
+			process.stderr.on('data', (data) => {
+				this.outputChannel.append(is.string(data) ? data : data.toString(encoding))
+			});
+
+			let failed = !process || !process.pid;
+			if (!failed) {
+				setTimeout(() => {
+					resolve(process);
+				}, 2000);
+			}
+		});
+	}
 
 	private handleConnectionClosed() {
 		// Check whether this is a normal shutdown in progress or the client stopped normally.

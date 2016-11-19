@@ -1,11 +1,10 @@
 import { PartialMessageInfo } from './message-info';
 import { DataCallback } from './data-callback';
-import { Event, Emitter } from '../events';
-import { ChildProcess } from 'child_process';
 import { AbstractMessageReader } from './abstract-reader';
 import { MessageReader } from './message-reader';
 import { Message } from '../messages';
 import * as WebSocket from 'ws';
+import * as _ from 'lodash';
 
 export class WebSocketMessageReader extends AbstractMessageReader implements MessageReader {
 	private socket: WebSocket;
@@ -24,6 +23,11 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 	private attachHandlers() {
 		this.socket.on('message', (data: any) => {
 			if (!this.callback) {
+				return;
+			}
+
+			// need to handle this better
+			if (_.isEmpty(data)) {
 				return;
 			}
 
