@@ -6,6 +6,8 @@
 	"editor.insertSpaces": false,
 	"editor.tabSize": 4,
 	"typescript.tsdk": "./node_modules/typescript/lib",
+	"tslint.configFile": "./src/tslint.json",
+	"tslint.enable": true,
 	"search.exclude": {
 		"**/node_modules": true,
 		"**/bower_components": true,

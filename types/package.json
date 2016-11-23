@@ -1,7 +1,7 @@
 {
 	"name": "vscode-languageserver-types",
 	"description": "Types used by the Language server for node",
-	"version": "2.0.0-alpha.1",
+	"version": "3.0.1-alpha.2",
 	"author": "Microsoft Corporation",
 	"license": "MIT",
 	"repository": {
@@ -16,13 +16,14 @@
 	"devDependencies": {
 		"mocha": "^2.4.5",
 		"typescript": "^2.0.3",
-		"@types/node": "^6.0.42",
-		"@types/mocha": "^2.2.32"
+		"@types/mocha": "^2.2.32",
+		"tslint": "^4.0.1"
 	},
 	"scripts": {
-		"prepublish": "./node_modules/.bin/tsc -p ./src",
-		"compile": "./node_modules/.bin/tsc -p ./src",
-		"watch": "./node_modules/.bin/tsc -w -p ./src",
-		"test": "./node_modules/.bin/mocha"
+		"prepublish": "tsc -p ./src",
+		"compile": "tsc -p ./src",
+		"lint": "./node_modules/.bin/tslint --config ./src/tslint.json --project ./src/tsconfig.json",
+		"watch": "tsc -w -p ./src",
+		"test": "mocha"
 	}
 }

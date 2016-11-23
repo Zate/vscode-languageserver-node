@@ -17,11 +17,14 @@ import { Message, MessageType,
 	NotificationType5, NotificationType6, NotificationType7, NotificationType8, NotificationType9
 } from './messages';
 
-import { MessageReader, DataCallback, StreamMessageReader, IPCMessageReader, WebSocketMessageReader } from './messageReader';
-import { MessageWriter, StreamMessageWriter, IPCMessageWriter, WebSocketMessageWriter } from './messageWriter';
+import { MessageReader, DataCallback, StreamMessageReader, IPCMessageReader } from './messageReader';
+import { MessageWriter, StreamMessageWriter, IPCMessageWriter } from './messageWriter';
 import { Disposable, Event, Emitter } from './events';
 import { CancellationTokenSource, CancellationToken } from './cancellation';
-import { WebSocketConnection, WebSocketConnectionOptions } from './connections/web-socket-connection';
+import {
+	WebSocketConnection, WebSocketConnectionOptions,
+	WebSocketMessageReader, WebSocketMessageWriter
+} from './websocket-connection/websocket-connection';
 
 export {
 	Message, MessageType, ErrorCodes, ResponseError,

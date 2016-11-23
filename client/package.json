@@ -1,7 +1,7 @@
 {
 	"name": "vscode-languageclient",
 	"description": "VSCode Language client implementation",
-	"version": "3.0.0-alpha.3",
+	"version": "3.0.1-alpha.2",
 	"author": "Microsoft Corporation",
 	"license": "MIT",
 	"engines": {
@@ -20,16 +20,18 @@
 		"@types/node": "^6.0.42",
 		"@types/ws": "^0.0.36",
 		"typescript": "^2.1.0",
-		"vscode": "^1.0.0"
+		"vscode": "^1.0.0",
+		"tslint": "^4.0.1"
 	},
 	"dependencies": {
-		"vscode-jsonrpc": "^3.0.0-alpha.2",
-		"vscode-languageserver-types": "^2.0.0-alpha.1",
+		"vscode-jsonrpc": "^3.0.1-alpha.2",
+		"vscode-languageserver-types": "^3.0.1-alpha.2",
 		"ws": "^1.1.1"
 	},
 	"scripts": {
 		"prepublish": "node ./node_modules/vscode/bin/install && ./node_modules/.bin/tsc -p ./src",
 		"compile": "./node_modules/.bin/tsc -p ./src",
+		"lint": "./node_modules/.bin/tslint --config ./src/tslint.json --project ./src/tsconfig.json",
 		"watch": "./node_modules/.bin/tsc -w -p ./src",
 		"update-vscode": "node ./node_modules/vscode/bin/install"
 	}

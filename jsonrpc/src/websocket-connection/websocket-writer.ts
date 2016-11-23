@@ -1,15 +1,13 @@
-import { AbstractMessageWriter } from './abstract-writer';
-import { MessageWriter } from './message-writer';
+import { AbstractMessageWriter } from '../message-writers/abstract-writer';
+import { MessageWriter } from '../message-writers/message-writer';
 import { Message } from '../messages';
 import * as WebSocket from 'ws';
 
 export class WebSocketMessageWriter extends AbstractMessageWriter implements MessageWriter {
 	private errorCount: number = 0;
-	private socket: WebSocket;
 
-	public constructor(socket: WebSocket) {
+	public constructor(private socket: WebSocket) {
 		super();
-		this.socket = socket;
 	}
 
 	public write(msg: Message): void {
@@ -20,7 +18,15 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 			binary: false
 		};
 
-		this.socket.send(data);
+		try {
+			this.socket.send(data, options, (err: Error) => {
+				if (!err) {
+					this.onSendError(err, msg);
+				}
+			});
+		} catch (err) {
+			this.onSendError(err, msg);
+		}
 	}
 
 	private toRpc(json: string) {
@@ -38,14 +44,8 @@ export class WebSocketMessageWriter extends AbstractMessageWriter implements Mes
 		return rpc;
 	}
 
-	private doSend(msg: Message) {
-		let json: string = JSON.stringify(msg);
-		let data = this.toRpc(json);
-		let options = {
-			mask: true,
-			binary: false
-		};
-
-		this.socket.send(data);
+	private onSendError(err, msg) {
+		this.errorCount++;
+		this.fireError(err, msg, this.errorCount);
 	}
 }

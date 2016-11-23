@@ -30,7 +30,24 @@ do
 	(cd $PACKAGE && \
 		yarn install && \
 		yarn run compile && \
-		(yarn link || (yarn unlink && yarn link)))
+		(yarn link || (yarn unlink && yarn link))
+		)
+
+
+	# make docker build
+    [ ! -f "$PACKAGE/Dockerfile" ] && continue
+
+	(cd $PACKAGE && \
+		# e.g., 16abca9b502bd77b90622888f8b1540b96459c8e
+		PACKAGE_GIT_VERSION=`git rev-parse HEAD` && \
+		# e.g., vscode-languageserver-types
+		PACKAGE_NAME=`yarn info . name | sed -n 2p` && \
+		echo "***"  && \
+		echo "Building Dockerfile: $PACKAGE_NAME:$PACKAGE_GIT_VERSION" && \
+		echo "" && \
+		docker build -t $PACKAGE_NAME:$PACKAGE_GIT_VERSION . && \
+		echo "***"
+		)
 
 	echo "---"
 done

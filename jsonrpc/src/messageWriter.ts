@@ -4,8 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-// rexport all
-export { WebSocketMessageWriter } from './message-writers/websocket-writer';
 export { IPCMessageWriter } from './message-writers/ipc-writer';
 export { StreamMessageWriter } from './message-writers/stream-writer';
 export { MessageWriter } from './message-writers/message-writer';

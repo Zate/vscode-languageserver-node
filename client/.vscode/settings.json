@@ -5,7 +5,8 @@
 	"eslint.enable": false,
 	"editor.insertSpaces": false,
 	"editor.tabSize": 4,
-	"tslint.enable": false,
 	"typescript.tsdk": "./node_modules/typescript/lib",
-	"typescript.tsserver.trace": "off"
+	"typescript.tsserver.trace": "off",
+	"tslint.configFile": "./src/tslint.json",
+	"tslint.enable": false
 }

@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-export { WebSocketMessageReader } from './message-readers/websocket-reader';
 export { IPCMessageReader } from './message-readers/ipc-reader';
 export { StreamMessageReader } from './message-readers/stream-reader';
 export { MessageReader } from './message-readers/message-reader';

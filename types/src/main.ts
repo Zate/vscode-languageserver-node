@@ -246,7 +246,7 @@ export namespace Command {
 	/**
 	 * Creates a new Command literal.
 	 */
-	export function create(title: string, command: string, ...args:any[]): Command {
+	export function create(title: string, command: string, ...args: any[]): Command {
 		let result: Command = { title, command };
 		if (Is.defined(args) && args.length > 0) {
 			result.arguments = args;
@@ -638,7 +638,7 @@ export interface CompletionItem {
 	 * a [CompletionRequest](#CompletionRequest) and a [CompletionResolveRequest]
 	 * (#CompletionResolveRequest)
 	 */
-	data?: any
+	data?: any;
 }
 
 /**
@@ -702,7 +702,7 @@ export namespace MarkedString {
 	 * @param plainText The plain text.
 	 */
 	export function fromPlainText(plainText: string): MarkedString {
-		return plainText.replace(/[\\`*_{}[\]()#+\-.!]/g, "\\$&"); // escape markdown syntax tokens: http://daringfireball.net/projects/markdown/syntax#backslash
+		return plainText.replace(/[\\`*_{}[\]()#+\-.!]/g, '\\$&'); // escape markdown syntax tokens: http://daringfireball.net/projects/markdown/syntax#backslash
 	}
 }
 
@@ -959,7 +959,7 @@ export namespace SymbolInformation {
 			name,
 			kind,
 			location: { uri, range }
-		}
+		};
 		if (containerName) {
 			result.containerName = containerName;
 		}
@@ -1041,7 +1041,7 @@ export interface CodeLens {
 	 * a [CodeLensRequest](#CodeLensRequest) and a [CodeLensResolveRequest]
 	 * (#CodeLensResolveRequest)
 	 */
-	data?: any
+	data?: any;
 }
 
 /**
@@ -1329,7 +1329,7 @@ class FullTextDocument implements TextDocument {
 		this._lineOffsets = null;
 	}
 
-	private getLineOffsets() : number[] {
+	private getLineOffsets(): number[] {
 		if (this._lineOffsets === null) {
 			let lineOffsets: number[] = [];
 			let text = this._content;
@@ -1341,7 +1341,7 @@ class FullTextDocument implements TextDocument {
 				}
 				let ch = text.charAt(i);
 				isLineStart = (ch === '\r' || ch === '\n');
-				if (ch === '\r' && i + 1 < text.length && text.charAt(i+1) === '\n') {
+				if (ch === '\r' && i + 1 < text.length && text.charAt(i + 1) === '\n') {
 					i++;
 				}
 			}
@@ -1353,7 +1353,7 @@ class FullTextDocument implements TextDocument {
 		return this._lineOffsets;
 	}
 
-	public positionAt(offset:number) {
+	public positionAt(offset: number) {
 		offset = Math.max(Math.min(offset, this._content.length), 0);
 
 		let lineOffsets = this.getLineOffsets();

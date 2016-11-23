@@ -1,11 +1,27 @@
 {
 	"compilerOptions": {
 		"target": "es5",
+		"lib": [
+			"es5"
+		],
+
+		"outDir": "../lib",
+
 		"module": "umd",
-		"sourceMap": false,
+		"moduleResolution": "node",
+
+		"sourceMap": true,
+		"inlineSources": false,
 		"declaration": true,
-		"stripInternal": true,
-		"lib": [ "es5" ],
-		"outDir": "../lib"
+		"stripInternal": false,
+
+		"preserveConstEnums": true,
+		"noEmitOnError": true,
+		"pretty": true,
+		"inlineSourceMap": false,
+
+		"removeComments": false,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
 	}
 }

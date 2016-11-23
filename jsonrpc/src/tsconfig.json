@@ -1,8 +1,20 @@
 {
 	"compilerOptions": {
-		"target": "es6",
-		"module": "commonjs",
+		"target": "es5",
+		"lib": [
+			"es5",
+			"es2015.promise"
+		],
+
+		"outDir": "../lib",
+
+		"module": "umd",
 		"moduleResolution": "node",
+
+		// "noUnusedLocals": true,
+		"noUnusedParameters": false,
+		"allowUnreachableCode": false,
+
 		"sourceMap": true,
 		"inlineSources": false,
 		"declaration": true,
@@ -14,9 +26,6 @@
 
 		"removeComments": false,
 		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-
-		"lib": [ "es6" ],
-		"outDir": "../lib"
+		"emitDecoratorMetadata": true
 	}
 }

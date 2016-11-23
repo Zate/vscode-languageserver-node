@@ -4,9 +4,17 @@
 		"**/node_modules": true,
 		"**/bower_components": true,
 
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/.DS_Store": true,
+
 		"**/lib": true
 	},
 	"files.exclude": {
+		"**/node_modules": true,
+		"**/bower_components": true,
+
 		"**/.git": true,
 		"**/.svn": true,
 		"**/.hg": true,

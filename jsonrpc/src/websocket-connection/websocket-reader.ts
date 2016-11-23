@@ -1,21 +1,18 @@
-import { PartialMessageInfo } from './message-info';
-import { DataCallback } from './data-callback';
-import { AbstractMessageReader } from './abstract-reader';
-import { MessageReader } from './message-reader';
+import { DataCallback } from '../message-readers/data-callback';
+import { AbstractMessageReader } from '../message-readers/abstract-reader';
+import { MessageReader } from '../message-readers/message-reader';
 import { Message } from '../messages';
 import * as WebSocket from 'ws';
-import * as _ from 'lodash';
+// import * as _ from 'lodash';
 
 let CRLF = '\r\n';
 let SEPARATOR = `${CRLF}${CRLF}`;
 
 export class WebSocketMessageReader extends AbstractMessageReader implements MessageReader {
-	private socket: WebSocket;
 	private callback: DataCallback;
 
-	public constructor(socket: WebSocket) {
+	public constructor(private socket: WebSocket) {
 		super();
-		this.socket = socket;
 		this.attachHandlers();
 	}
 
@@ -42,11 +39,11 @@ export class WebSocketMessageReader extends AbstractMessageReader implements Mes
 
 	private onMessage(data: any) {
 		let response: string[] = data.split(SEPARATOR, 2);
-		let headers = response[0];
+		// let headers = response[0];
 		let json = response[1];
 
-		// let msg: Message = JSON.parse(json);
-		let msg = JSON.parse(json);
+		let msg: Message = JSON.parse(json);
+		// let msg = JSON.parse(json);
 		this.callback(msg);
 	}
 }
