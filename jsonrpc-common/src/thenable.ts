@@ -2,7 +2,4 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-'use strict';
-
-export { IPCMessageReader } from './message-readers/ipc-reader';
-export { StreamMessageReader } from './message-readers/stream-reader';
+interface Thenable<T> extends PromiseLike<T> {}

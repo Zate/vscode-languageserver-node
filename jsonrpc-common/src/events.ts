@@ -56,7 +56,7 @@ class DisposableImpl implements Disposable {
 	static from(...disposables: Disposable[]): DisposableImpl {
 		return new DisposableImpl(function () {
 			if (disposables) {
-				for(let disposable of disposables) {
+				for (let disposable of disposables) {
 					disposable.dispose();
 				}
 				disposables = undefined;
@@ -92,11 +92,11 @@ class CallbackList {
 			this._contexts = [];
 		}
 		this._callbacks.push(callback);
-        this._contexts.push(context);
+		this._contexts.push(context);
 
-        if (Array.isArray(bucket)) {
-            bucket.push({ dispose: () => this.remove(callback, context) });
-        }
+		if (Array.isArray(bucket)) {
+			bucket.push({ dispose: () => this.remove(callback, context) });
+		}
 	}
 
 	public remove(callback: Function, context: any = null): void {
@@ -104,8 +104,8 @@ class CallbackList {
 			return;
 		}
 
-		var foundCallbackWithDifferentContext = false;
-		for (var i = 0, len = this._callbacks.length; i < len; i++) {
+		let foundCallbackWithDifferentContext = false;
+		for (let i = 0, len = this._callbacks.length; i < len; i++) {
 			if (this._callbacks[i] === callback) {
 				if (this._contexts[i] === context) {
 					// callback & context match => remove it
@@ -128,11 +128,11 @@ class CallbackList {
 			return;
 		}
 
-		var ret: any[] = [],
+		let ret: any[] = [],
 			callbacks = this._callbacks.slice(0),
 			contexts = this._contexts.slice(0);
 
-		for (var i = 0, len = callbacks.length; i < len; i++) {
+		for (let i = 0, len = callbacks.length; i < len; i++) {
 			try {
 				ret.push(callbacks[i].apply(contexts[i], args));
 			} catch (e) {
@@ -187,12 +187,12 @@ export class Emitter<T> {
 					dispose: () => {
 						this._callbacks.remove(listener, thisArgs);
 						result.dispose = Emitter._noop;
-						if(this._options && this._options.onLastListenerRemove && this._callbacks.isEmpty()) {
+						if (this._options && this._options.onLastListenerRemove && this._callbacks.isEmpty()) {
 							this._options.onLastListenerRemove(this);
 						}
 					}
 				};
-				if(Array.isArray(disposables)) {
+				if (Array.isArray(disposables)) {
 					disposables.push(result);
 				}
 
@@ -213,7 +213,7 @@ export class Emitter<T> {
 	}
 
 	dispose() {
-		if(this._callbacks) {
+		if (this._callbacks) {
 			this._callbacks.dispose();
 			this._callbacks = undefined;
 		}

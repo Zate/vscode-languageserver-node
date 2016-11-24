@@ -9,7 +9,8 @@ import * as assert from 'assert';
 import { Duplex, Writable, Readable } from 'stream';
 import { inherits } from 'util';
 
-import { Message, RequestMessage } from '../messages';
+import { Message, RequestMessage } from 'vscode-jsonrpc-common';
+
 import { StreamMessageWriter } from '../messageWriter';
 import { StreamMessageReader } from '../messageReader';
 

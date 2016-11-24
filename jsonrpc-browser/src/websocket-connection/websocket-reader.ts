@@ -1,9 +1,10 @@
-import { DataCallback } from '../message-readers/data-callback';
-import { AbstractMessageReader } from '../message-readers/abstract-reader';
-import { MessageReader } from '../message-readers/message-reader';
-import { Message } from '../messages';
+import {
+	AbstractMessageReader, MessageReader,
+	DataCallback,
+	MessageBuffer,
+	Message
+} from 'vscode-jsonrpc-common';
 import * as WebSocket from 'ws';
-// import * as _ from 'lodash';
 
 let CRLF = '\r\n';
 let SEPARATOR = `${CRLF}${CRLF}`;

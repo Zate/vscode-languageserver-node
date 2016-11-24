@@ -1,9 +1,7 @@
-import * as WebSocket from 'ws';
-
-// rexport all
 import { WebSocketMessageReader } from './websocket-reader';
 import { WebSocketMessageWriter } from './websocket-writer';
 export { WebSocketMessageReader, WebSocketMessageWriter };
+import * as WebSocket from 'ws';
 
 export interface WebSocketConnectionOptions {
 	secure?: boolean;
@@ -15,10 +13,10 @@ export interface WebSocketConnectionOptions {
 
 export class WebSocketConnection {
 	private socket: WebSocket;
-	public connection: Promise<WebSocket>;
+	public readonly connection: Promise<WebSocket>;
 
 	// public constructor(private options: WebSocketConnectionOptions) {
-	public constructor() {
+	private constructor() {
 		this.connection = new Promise((resolve, reject) => {
 			let onOpenError = (err: Error) => {
 				reject(err);
@@ -42,6 +40,26 @@ export class WebSocketConnection {
 			} catch (err) {
 				onOpenError(err);
 			}
+		});
+	}
+
+	public static create(): Promise<{ reader: WebSocketMessageReader, writer: WebSocketMessageWriter }> {
+		// let options: WebSocketConnectionOptions = {
+		//     secure: false,
+		//     host: 'localhost',
+		//     port: '4389'
+		// };
+		// let ws = new WebSocketConnection(options);
+		let ws = new WebSocketConnection();
+
+		return ws.connection.then((socket: WebSocket) => {
+			let reader = new WebSocketMessageReader(socket);
+			let writer = new WebSocketMessageWriter(socket);
+
+			return {
+				reader,
+				writer
+			};
 		});
 	}
 }

@@ -4,5 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-export { IPCMessageReader } from './message-readers/ipc-reader';
-export { StreamMessageReader } from './message-readers/stream-reader';
+export { AbstractMessageReader } from './abstract-message-reader';
+export { MessageReader } from './message-reader';
+export { DataCallback } from './data-callback';
+export { MessageBuffer } from './message-buffer';
+export { PartialMessageInfo } from './message-info';

@@ -9,10 +9,17 @@ import * as assert from 'assert';
 import { Duplex, Writable, Readable, Transform } from 'stream';
 import { inherits } from 'util';
 
-import { Message, RequestMessage, RequestType, RequestType3, ResponseMessage, ResponseError, NotificationType, NotificationType2, isReponseMessage, ErrorCodes } from '../messages';
+import {
+	Message,
+	RequestMessage, RequestType, RequestType3,
+	ResponseMessage, ResponseError,
+	NotificationType, NotificationType2, isReponseMessage,
+	ErrorCodes, CancellationTokenSource,
+	NotificationHandler, RequestHandler, Logger
+} from 'vscode-jsonrpc-common';
+
 import { StreamMessageWriter } from '../messageWriter';
 import { StreamMessageReader } from '../messageReader';
-import { CancellationTokenSource } from '../cancellation';
 
 import * as hostConnection from '../main';
 
@@ -113,20 +120,20 @@ function testRequestHandler(params: any) : any | ResponseError<void> {
 };
 
 
-function createEventHandler<T>(result: T[]) : hostConnection.NotificationHandler<T> {
+function createEventHandler<T>(result: T[]) : NotificationHandler<T> {
 	return (event) => {
 		result.push(event);
 	}
 };
 
-function createEchoRequestHandler<P>(result: P[]) : hostConnection.RequestHandler<P, any, any> {
+function createEchoRequestHandler<P>(result: P[]) : RequestHandler<P, any, any> {
 	return (param: P): any | ResponseError<any> => {
 		result.push(param);
 		return param;
 	}
 };
 
-let Logger: hostConnection.Logger = {
+let Logger: Logger = {
 	error: (message: string) => {},
 	warn: (message: string) => {},
 	info: (message: string) => {},

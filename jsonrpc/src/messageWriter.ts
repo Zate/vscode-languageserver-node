@@ -6,4 +6,3 @@
 
 export { IPCMessageWriter } from './message-writers/ipc-writer';
 export { StreamMessageWriter } from './message-writers/stream-writer';
-export { MessageWriter } from './message-writers/message-writer';

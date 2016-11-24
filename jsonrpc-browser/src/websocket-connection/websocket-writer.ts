@@ -1,6 +1,4 @@
-import { AbstractMessageWriter } from '../message-writers/abstract-writer';
-import { MessageWriter } from '../message-writers/message-writer';
-import { Message } from '../messages';
+import { AbstractMessageWriter, MessageWriter, Message } from 'vscode-jsonrpc-common';
 import * as WebSocket from 'ws';
 
 export class WebSocketMessageWriter extends AbstractMessageWriter implements MessageWriter {

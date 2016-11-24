@@ -1,10 +1,11 @@
-import { PartialMessageInfo } from './message-info';
-import { DataCallback } from './data-callback';
-import { Event, Emitter } from '../events';
+import {
+	AbstractMessageReader, MessageReader,
+	DataCallback,
+	MessageBuffer,
+	Message, PartialMessageInfo,
+	Event, Emitter
+} from 'vscode-jsonrpc-common';
 import { ChildProcess } from 'child_process';
-import { AbstractMessageReader } from './abstract-reader';
-import { MessageBuffer } from './message-buffer';
-import { MessageReader } from './message-reader';
 
 export class StreamMessageReader extends AbstractMessageReader implements MessageReader {
 	private readable: NodeJS.ReadableStream;

@@ -1,10 +1,9 @@
 let DefaultSize: number = 8192;
-let CR:number = new Buffer('\r', 'ascii')[0];
-let LF:number = new Buffer('\n', 'ascii')[0];
+let CR: number = new Buffer('\r', 'ascii')[0];
+let LF: number = new Buffer('\n', 'ascii')[0];
 let CRLF: string = '\r\n';
 
 export class MessageBuffer {
-
 	private encoding: string;
 	private index: number;
 	private buffer: Buffer;
@@ -15,17 +14,17 @@ export class MessageBuffer {
 		this.buffer = new Buffer(DefaultSize);
 	}
 
-	public append(chunk: Buffer | String):void {
-		var toAppend: Buffer = <Buffer> chunk;
-		if (typeof(chunk) == 'string') {
-			var str = <string> chunk;
+	public append(chunk: Buffer | String): void {
+		let toAppend: Buffer = <Buffer> chunk;
+		if (typeof(chunk) === 'string') {
+			let str = <string> chunk;
 			toAppend = new Buffer(str.length);
 			toAppend.write(str, 0, str.length, this.encoding);
 		}
 		if (this.buffer.length - this.index >= toAppend.length) {
 			toAppend.copy(this.buffer, this.index, 0, toAppend.length);
 		} else {
-			var newSize = (Math.ceil((this.index + toAppend.length) / DefaultSize) + 1) * DefaultSize;
+			let newSize = (Math.ceil((this.index + toAppend.length) / DefaultSize) + 1) * DefaultSize;
 			if (this.index === 0) {
 				this.buffer = new Buffer(newSize);
 				toAppend.copy(this.buffer, 0, 0, toAppend.length);
@@ -33,7 +32,7 @@ export class MessageBuffer {
 				this.buffer = Buffer.concat([this.buffer.slice(0, this.index), toAppend], newSize);
 			}
 		}
-		this.index+= toAppend.length;
+		this.index += toAppend.length;
 	}
 
 	public tryReadHeaders(): { [key: string]: string; } {
@@ -56,7 +55,7 @@ export class MessageBuffer {
 			let key = header.substr(0, index);
 			let value = header.substr(index + 1).trim();
 			result[key] = value;
-		})
+		});
 
 		let nextStart = current + 4;
 		this.buffer = this.buffer.slice(nextStart);
@@ -75,7 +74,7 @@ export class MessageBuffer {
 		return result;
 	}
 
-	public get numberOfBytes():number {
+	public get numberOfBytes(): number {
 		return this.index;
 	}
 }

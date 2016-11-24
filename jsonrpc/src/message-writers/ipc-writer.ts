@@ -1,8 +1,11 @@
-import { Event, Emitter } from '../events';
+import {
+	AbstractMessageWriter, MessageWriter,
+	DataCallback,
+	MessageBuffer,
+	Message, PartialMessageInfo,
+	Event, Emitter
+} from 'vscode-jsonrpc-common';
 import { ChildProcess } from 'child_process';
-import { AbstractMessageWriter } from './abstract-writer';
-import { MessageWriter } from './message-writer';
-import { Message } from '../messages';
 
 export class IPCMessageWriter extends AbstractMessageWriter implements MessageWriter {
 

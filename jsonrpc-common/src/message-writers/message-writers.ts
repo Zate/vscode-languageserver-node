@@ -4,5 +4,5 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-export { IPCMessageReader } from './message-readers/ipc-reader';
-export { StreamMessageReader } from './message-readers/stream-reader';
+export { AbstractMessageWriter } from './abstract-message-writer';
+export { MessageWriter } from './message-writer';

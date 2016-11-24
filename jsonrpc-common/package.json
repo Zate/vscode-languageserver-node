@@ -1,6 +1,6 @@
 {
-	"name": "vscode-jsonrpc",
-	"description": "A json rpc implementation over streams",
+	"name": "vscode-jsonrpc-common",
+	"description": "code shared between vscode-jsonrpc and vscode-jsonrpc-browser",
 	"version": "3.0.1-alpha.2",
 	"author": "Microsoft Corporation",
 	"license": "MIT",
@@ -19,15 +19,9 @@
 	"devDependencies": {
 		"@types/lodash": "^4.14.39",
 		"@types/mocha": "^2.2.32",
-		"@types/node": "^6.0.42",
-		"@types/ws": "^0.0.36",
 		"mocha": "^3.1.0",
-		"tslint": "^4.0.1",
-		"typescript": "^2.1.0"
-	},
-	"dependencies": {
-		"vscode-jsonrpc-common": "file://Users/mbana/dev/vscode/mbana/vscode-languageserver-node/jsonrpc-common",
-		"ws": "^1.1.1"
+		"typescript": "^2.1.0",
+		"tslint": "^4.0.1"
 	},
 	"scripts": {
 		"prepublish": "./node_modules/.bin/tsc -p ./src",
