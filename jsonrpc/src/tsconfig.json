@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
 		"target": "es5",
-		"module": "commonjs",
+		"module": "umd",
 		"moduleResolution": "node",
-		"sourceMap": false,
+		"sourceMap": true,
 		"declaration": true,
 		"stripInternal": true,
 		"lib": [ "es5", "es2015.promise" ],

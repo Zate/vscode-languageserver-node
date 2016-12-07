@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"target": "es5",
 		"module": "umd",
-		"sourceMap": false,
+		"moduleResolution": "node",
+		"sourceMap": true,
 		"declaration": true,
 		"stripInternal": true,
 		"lib": [ "es5" ],
