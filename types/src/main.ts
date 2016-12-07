@@ -309,17 +309,29 @@ export namespace TextEdit {
 	}
 }
 
+
+/**
+ * Describes textual changes on a text document.
+ */
+export interface TextDocumentEdit {
+	/**
+	 * The text document to change.
+	 */
+	textDocument: VersionedTextDocumentIdentifier;
+
+	/**
+	 * The edits to be applied.
+	 */
+	edits: TextEdit[];
+}
+
+
 /**
  * A workspace edit represents changes to many resources managed
  * in the workspace.
  */
 export interface WorkspaceEdit {
-	// creates: { [uri: string]: string; };
-	/**
-	 * Holds changes to existing resources.
-	 */
-	changes: { [uri: string]: TextEdit[]; };
-	// deletes: string[];
+	changes: TextDocumentEdit[];
 }
 
 /**
@@ -337,6 +349,12 @@ export interface TextEditChange {
 	 * Clears the edits for this change.
 	 */
 	clear(): void;
+
+	/**
+	 * Adds a text edit.
+	 * @param edit the text edit to add.
+	 */
+	add(edit: TextEdit): void;
 
 	/**
 	 * Insert the given text at the given position.
@@ -362,18 +380,59 @@ export interface TextEditChange {
 	delete(range: Range): void;
 }
 
+class TextEditChangeImpl implements TextEditChange {
+
+	private edits: TextEdit[];
+
+	public constructor(edits: TextEdit[]) {
+		this.edits = edits;
+	}
+
+	public insert(position: Position, newText: string): void {
+		this.edits.push(TextEdit.insert(position, newText));
+	}
+
+	public replace(range: Range, newText: string): void {
+		this.edits.push(TextEdit.replace(range, newText));
+	}
+
+	public delete(range: Range): void {
+		this.edits.push(TextEdit.del(range));
+	}
+
+	public add(edit: TextEdit): void {
+		this.edits.push(edit);
+	}
+
+	public all(): TextEdit[] {
+		return this.edits;
+	}
+
+	public clear(): void {
+		this.edits.splice(0, this.edits.length);
+	}
+}
+
 /**
  * A workspace change helps constructing changes to a workspace.
  */
 export class WorkspaceChange {
-	private workspaceEdit: WorkspaceEdit;
-	private textEditChanges: { [uri: string]: TextEditChange };
+	private _workspaceEdit: WorkspaceEdit;
+	private _textEditChanges: { [uri: string]: TextEditChange };
 
-	constructor() {
-		this.workspaceEdit = {
-			changes: Object.create(null)
-		};
-		this.textEditChanges = Object.create(null);
+	constructor(workspaceEdit?: WorkspaceEdit) {
+		this._textEditChanges = Object.create(null);
+		if (workspaceEdit) {
+			this._workspaceEdit = workspaceEdit;
+			workspaceEdit.changes.forEach((textDocumentEdit) => {
+				let textEditChange = new TextEditChangeImpl(textDocumentEdit.edits);
+				this._textEditChanges[textDocumentEdit.textDocument.uri] = textEditChange;
+			});
+		} else {
+			this._workspaceEdit = {
+				changes: []
+			};
+		}
 	}
 
 	/**
@@ -381,43 +440,71 @@ export class WorkspaceChange {
 	 * use to be returned from a workspace edit operation like rename.
 	 */
 	public get edit(): WorkspaceEdit {
-		return this.workspaceEdit;
+		return this._workspaceEdit;
 	}
 
 	/**
 	 * Returns the [TextEditChange](#TextEditChange) to manage text edits
 	 * for resources.
 	 */
-	public getTextEditChange(uri: string): TextEditChange {
-		class TextEditChangeImpl implements TextEditChange {
-			private edits: TextEdit[];
-			constructor(edits: TextEdit[]) {
-				this.edits = edits;
+	public getTextEditChange(textDocument: VersionedTextDocumentIdentifier): TextEditChange;
+	public getTextEditChange(uri: string): TextEditChange;
+	public getTextEditChange(key: string | VersionedTextDocumentIdentifier): TextEditChange {
+		if (VersionedTextDocumentIdentifier.is(key)) {
+			let textDocument: VersionedTextDocumentIdentifier = key;
+			let result: TextEditChange = this._textEditChanges[textDocument.uri];
+			if (!result) {
+				let edits: TextEdit[] = [];
+				let textDocumentEdit: TextDocumentEdit = {
+					textDocument,
+					edits
+				};
+				this._workspaceEdit.changes.push(textDocumentEdit);
+				result = new TextEditChangeImpl(edits);
+				this._textEditChanges[textDocument.uri] = result;
 			}
-			insert(position: Position, newText: string): void {
-				this.edits.push(TextEdit.insert(position, newText));
-			}
-			replace(range: Range, newText: string): void {
-				this.edits.push(TextEdit.replace(range, newText));
-			}
-			delete(range: Range): void {
-				this.edits.push(TextEdit.del(range));
-			}
-			all(): TextEdit[] {
-				return this.edits;
-			}
-			clear(): void {
-				this.edits.splice(0, this.edits.length);
-			}
+			return result;
+		} else {
+			return this._textEditChanges[key];
 		}
-		let result = this.textEditChanges[uri];
-		if (!result) {
-			let edits: TextEdit[] = [];
-			this.workspaceEdit.changes[uri] = edits;
-			result = new TextEditChangeImpl(edits);
-			this.textEditChanges[uri] = result;
-		}
-		return result;
+	}
+}
+
+/**
+ * A snippet string is a template which allows to insert text
+ * and to control the editor cursor when insertion happens.
+ *
+ * A snippet can define tab stops and placeholders with `$1`, `$2`
+ * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+ * the end of the snippet. Placeholders with equal identifiers are linked,
+ * that is typing in one will update others too.
+ */
+export interface SnippetString {
+
+	/**
+	 * The snippet string.
+	 */
+	value: string;
+}
+
+/**
+ * The SnippetString namespace provides helper functions to work with
+ * [SnippetString](#SnippetString) literals.
+ */
+export namespace SnippetString {
+	/**
+	 * Creates a new SnippetString literal.
+	 * @param uri The document's uri.
+	 */
+	export function create(value: string): SnippetString {
+		return { value };
+	}
+	/**
+	 * Checks whether the given literal conforms to the [SnippetString](#SnippetString) interface.
+	 */
+	export function is(value: any): value is SnippetString {
+		let candidate = value as SnippetString;
+		return Is.defined(candidate) && Is.string(candidate.value);
 	}
 }
 
@@ -610,14 +697,41 @@ export interface CompletionItem {
 	 * this completion. When `falsy` the [label](#CompletionItem.label)
 	 * is used.
 	 */
-	insertText?: string;
+	insertText?: string | SnippetString;
 
 	/**
+	 * A range of text that should be replaced by this completion item.
+	 *
+	 * Defaults to a range from the start of the current word to the
+	 * current position.
+	 *
+	 * *Note:* The range must be a single line and it must
+	 * contain the position at which completion has been requested.
+	 */
+	range?: Range;
+
+	/**
+	 * * @deprecated **Deprecated** in favor of `CompletionItem.insertText` and `CompletionItem.range`.
+	 *
 	 * An [edit](#TextEdit) which is applied to a document when selecting
 	 * this completion. When an edit is provided the value of
-	 * [insertText](#CompletionItem.insertText) is ignored.
+	 * [insertText](#CompletionItem.insertText) and [range](#CompletionItem.range) is ignored.
 	 */
 	textEdit?: TextEdit;
+
+	/**
+	 * An optional array of additional [text edits](#TextEdit) that are applied when
+	 * selecting this completion. Edits must not overlap with the main [edit](#CompletionItem.textEdit)
+	 * nor with themselves.
+	 */
+	additionalTextEdits?: TextEdit[];
+
+	/**
+	 * An optional [command](#Command) that is executed *after* inserting this completion. *Note* that
+	 * additional modifications to the current document should be described with the
+	 * [additionalTextEdits](#CompletionItem.additionalTextEdits)-property.
+	 */
+	command?: Command;
 
 	/**
 	 * An data entry field that is preserved on a completion item between
@@ -693,7 +807,7 @@ export namespace MarkedString {
 }
 
 /**
- * The result of a hove request.
+ * The result of a hover request.
  */
 export interface Hover {
 	/**
@@ -798,12 +912,12 @@ export interface SignatureHelp {
 	/**
 	 * The active signature.
 	 */
-	activeSignature?: number;
+	activeSignature: number;
 
 	/**
 	 * The active parameter of the active signature.
 	 */
-	activeParameter?: number;
+	activeParameter: number;
 }
 
 /**
@@ -944,7 +1058,7 @@ export namespace SymbolInformation {
 		let result: SymbolInformation = {
 			name,
 			kind,
-			location: { uri, range }
+			location: { uri: uri as any, range }
 		}
 		if (containerName) {
 			result.containerName = containerName;
@@ -1106,7 +1220,7 @@ export class DocumentLink {
 	/**
 	 * The uri this link points to.
 	 */
-	target: string;
+	target?: string;
 }
 
 /**
@@ -1142,14 +1256,14 @@ export interface TextDocument {
 	 *
 	 * @readonly
 	 */
-	uri: string;
+	readonly uri: string;
 
 	/**
 	 * The identifier of the language associated with this document.
 	 *
 	 * @readonly
 	 */
-	languageId: string;
+	readonly languageId: string;
 
 	/**
 	 * The version number of this document (it will strictly increase after each
@@ -1157,7 +1271,7 @@ export interface TextDocument {
 	 *
 	 * @readonly
 	 */
-	version: number;
+	readonly version: number;
 
 	/**
 	 * Get the text of this document.
@@ -1166,30 +1280,30 @@ export interface TextDocument {
 	 */
 	getText(): string;
 
-    /**
-     * Converts a zero-based offset to a position.
-     *
-     * @param offset A zero-based offset.
-     * @return A valid [position](#Position).
-     */
-    positionAt(offset: number): Position;
+	/**
+	 * Converts a zero-based offset to a position.
+	 *
+	 * @param offset A zero-based offset.
+	 * @return A valid [position](#Position).
+	 */
+	positionAt(offset: number): Position;
 
-    /**
-     * Converts the position to a zero-based offset.
-     *
-     * The position will be [adjusted](#TextDocument.validatePosition).
-     *
-     * @param position A position.
-     * @return A valid zero-based offset.
-     */
-    offsetAt(position: Position): number;
+	/**
+	 * Converts the position to a zero-based offset.
+	 *
+	 * The position will be [adjusted](#TextDocument.validatePosition).
+	 *
+	 * @param position A position.
+	 * @return A valid zero-based offset.
+	 */
+	offsetAt(position: Position): number;
 
-    /**
-     * The number of lines in this document.
-     *
-     * @readonly
-     */
-    lineCount: number;
+	/**
+	 * The number of lines in this document.
+	 *
+	 * @readonly
+	 */
+	readonly lineCount: number;
 }
 
 export namespace TextDocument {
@@ -1223,6 +1337,40 @@ export interface TextDocumentChangeEvent {
 }
 
 /**
+ * Represents reasons why a text document is saved.
+ */
+export enum TextDocumentSaveReason {
+
+	/**
+	 * Manually triggered, e.g. by the user pressing save, by starting debugging,
+	 * or by an API call.
+	 */
+	Manual = 1,
+
+	/**
+	 * Automatic after a delay.
+	 */
+	AfterDelay = 2,
+
+	/**
+	 * When the editor lost focus.
+	 */
+	FocusOut = 3
+}
+
+export interface TextDocumentWillSaveEvent {
+	/**
+	 * The document that will be saved
+	 */
+	document: TextDocument;
+
+	/**
+	 * The reason why save was triggered.
+	 */
+	reason: TextDocumentSaveReason;
+}
+
+/**
  * An event describing a change to a text document. If range and rangeLength are omitted
  * the new text is considered to be the full content of the document.
  */
@@ -1249,7 +1397,7 @@ class FullTextDocument implements TextDocument {
 	private _languageId: string;
 	private _version: number;
 	private _content: string;
-	private _lineOffsets: number[];
+	private _lineOffsets: number[] | null;
 
 	public constructor(uri: string, languageId: string, version: number, content: string) {
 		this._uri = uri;

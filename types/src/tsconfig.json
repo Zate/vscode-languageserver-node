@@ -6,7 +6,13 @@
 		"sourceMap": true,
 		"declaration": true,
 		"stripInternal": true,
-		"lib": [ "es5" ],
-		"outDir": "../lib"
+		"lib": [ "es2015" ],
+		"outDir": "../lib",
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
 	}
 }

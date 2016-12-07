@@ -44,7 +44,7 @@ interface CancelParams {
 }
 
 namespace CancelNotification {
-	export const type: NotificationType<CancelParams, void> = { get method() { return '$/cancelRequest'; }, _: undefined };
+	export const type: NotificationType<CancelParams, void> = { get method() { return '$/cancelRequest'; } };
 }
 
 export interface GenericRequestHandler<R, E> {
@@ -189,7 +189,7 @@ export interface SetTraceParams {
 }
 
 export namespace SetTraceNotification {
-	export const type: NotificationType<SetTraceParams, void> = { get method() { return '$/setTraceNotification'; }, _: undefined };
+	export const type: NotificationType<SetTraceParams, void> = { get method() { return '$/setTraceNotification'; } };
 }
 
 export interface LogTraceParams {
@@ -198,7 +198,7 @@ export interface LogTraceParams {
 }
 
 export namespace LogTraceNotification {
-	export const type: NotificationType<LogTraceParams, void> = { get method() { return '$/logTraceNotification'; }, _: undefined };
+	export const type: NotificationType<LogTraceParams, void> = { get method() { return '$/logTraceNotification'; } };
 }
 
 export interface Tracer {
@@ -217,7 +217,7 @@ export interface MessageConnection {
 	sendRequest<P1, P2, P3, P4, P5, P6, P7, R, E, RO>(type: RequestType7<P1, P2, P3, P4, P5, P6, P7, R, E, RO>, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, token?: CancellationToken) : Thenable<R>;
 	sendRequest<P1, P2, P3, P4, P5, P6, P7, P8, R, E, RO>(type: RequestType8<P1, P2, P3, P4, P5, P6, P7, P8, R, E, RO>, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, token?: CancellationToken) : Thenable<R>;
 	sendRequest<P1, P2, P3, P4, P5, P6, P7, P8, P9, R, E, RO>(type: RequestType9<P1, P2, P3, P4, P5, P6, P7, P8, P9, R, E, RO>, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, token?: CancellationToken) : Thenable<R>;
-	sendRequest<R>(method: string | MessageType, ...params: any[]): Thenable<R>;
+	sendRequest<R>(method: string, ...params: any[]): Thenable<R>;
 
 	onRequest<R, E, RO>(type: RequestType0<R, E, RO>, handler: RequestHandler0<R, E>): void;
 	onRequest<P, R, E, RO>(type: RequestType<P, R, E, RO>, handler: RequestHandler<P, R, E>): void;
@@ -230,7 +230,7 @@ export interface MessageConnection {
 	onRequest<P1, P2, P3, P4, P5, P6, P7, R, E, RO>(type: RequestType7<P1, P2, P3, P4, P5, P6, P7, R, E, RO>, handler: RequestHandler7<P1, P2, P3, P4, P5, P6, P7, R, E>): void;
 	onRequest<P1, P2, P3, P4, P5, P6, P7, P8, R, E, RO>(type: RequestType8<P1, P2, P3, P4, P5, P6, P7, P8, R, E, RO>, handler: RequestHandler8<P1, P2, P3, P4, P5, P6, P7, P8, R, E>): void;
 	onRequest<P1, P2, P3, P4, P5, P6, P7, P8, P9, R, E, RO>(type: RequestType9<P1, P2, P3, P4, P5, P6, P7, P8, P9, R, E, RO>, handler: RequestHandler9<P1, P2, P3, P4, P5, P6, P7, P8, P9, R, E>): void;
-	onRequest<R, E>(method: string | MessageType, handler: GenericRequestHandler<R, E>): void;
+	onRequest<R, E>(method: string, handler: GenericRequestHandler<R, E>): void;
 
 	sendNotification<RO>(type: NotificationType0<RO>): void;
 	sendNotification<P, RO>(type: NotificationType<P, RO>, params?: P): void;
@@ -243,7 +243,7 @@ export interface MessageConnection {
 	sendNotification<P1, P2, P3, P4, P5, P6, P7, RO>(type: NotificationType7<P1, P2, P3, P4, P5, P6, P7, RO>, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7): void;
 	sendNotification<P1, P2, P3, P4, P5, P6, P7, P8, RO>(type: NotificationType8<P1, P2, P3, P4, P5, P6, P7, P8, RO>, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8): void;
 	sendNotification<P1, P2, P3, P4, P5, P6, P7, P8, P9, RO>(type: NotificationType9<P1, P2, P3, P4, P5, P6, P7, P8, P9, RO>, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9): void;
-	sendNotification(method: string | MessageType, ...params: any[]): void;
+	sendNotification(method: string, ...params: any[]): void;
 
 	onNotification<RO>(type: NotificationType0<RO>, handler: NotificationHandler0): void;
 	onNotification<P, RO>(type: NotificationType<P, RO>, handler: NotificationHandler<P>): void;
@@ -256,14 +256,14 @@ export interface MessageConnection {
 	onNotification<P1, P2, P3, P4, P5, P6, P7, RO>(type: NotificationType7<P1, P2, P3, P4, P5, P6, P7, RO>, handler: NotificationHandler7<P1, P2, P3, P4, P5, P6, P7>): void;
 	onNotification<P1, P2, P3, P4, P5, P6, P7, P8, RO>(type: NotificationType8<P1, P2, P3, P4, P5, P6, P7, P8, RO>, handler: NotificationHandler8<P1, P2, P3, P4, P5, P6, P7, P8>): void;
 	onNotification<P1, P2, P3, P4, P5, P6, P7, P8, P9, RO>(type: NotificationType9<P1, P2, P3, P4, P5, P6, P7, P8, P9, RO>, handler: NotificationHandler9<P1, P2, P3, P4, P5, P6, P7, P8, P9>): void;
-	onNotification(method: string | MessageType, handler: GenericNotificationHandler): void;
+	onNotification(method: string, handler: GenericNotificationHandler): void;
 
 	trace(value: Trace, tracer: Tracer, sendNotification?: boolean): void;
 
 	onError: Event<[Error, Message, number]>;
 	onClose: Event<void>;
 	onUnhandledNotification: Event<NotificationMessage>;
-	listen();
+	listen(): void;
 	onDispose: Event<void>;
 	dispose(): void;
 }
@@ -271,7 +271,7 @@ export interface MessageConnection {
 interface ResponsePromise {
 	method: string;
 	timerStart: number;
-	resolve: (response) => void;
+	resolve: (response: any) => void;
 	reject: (error: any) => void
 }
 
@@ -293,10 +293,10 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 	let requestTokens: { [id: string] : CancellationTokenSource } = Object.create(null);
 
 	let trace: Trace = Trace.Off;
-	let tracer: Tracer;
+	let tracer: Tracer | undefined;
 
 	let state: ConnectionState = ConnectionState.New;
-	let errorEmitter: Emitter<[Error, Message, number]> = new Emitter<[Error, Message, number]>();
+	let errorEmitter: Emitter<[Error, Message | undefined, number | undefined]> = new Emitter<[Error, Message, number]>();
 	let closeEmitter: Emitter<void> = new Emitter<void>();
 	let unhandledNotificationEmitter: Emitter<NotificationMessage> = new Emitter<NotificationMessage>();
 	let disposeEmitter: Emitter<void> = new Emitter<void>();
@@ -342,7 +342,7 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 			return;
 		}
 
-		function reply(resultOrError: any | ResponseError<any>): void {
+		function reply(resultOrError: any | ResponseError<any>, method: string, startTime: number): void {
 			let message: ResponseMessage = {
 				jsonrpc: version,
 				id: requestMessage.id
@@ -352,17 +352,19 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 			} else {
 				message.result = is.undefined(resultOrError) ? null : resultOrError;
 			}
+			traceSendingResponse(message, method, startTime);
 			messageWriter.write(message);
 		}
-		function replyError(error: ResponseError<any>) {
+		function replyError(error: ResponseError<any>, method: string, startTime: number) {
 			let message: ResponseMessage = {
 				jsonrpc: version,
 				id: requestMessage.id,
 				error: error.toJson()
 			};
+			traceSendingResponse(message, method, startTime);
 			messageWriter.write(message);
 		}
-		function replySuccess(result: any) {
+		function replySuccess(result: any, method: string, startTime: number) {
 			// The JSON RPC defines that a response must either have a result or an error
 			// So we can't treat undefined as a valid response result.
 			if (is.undefined(result)) {
@@ -373,10 +375,14 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 				id: requestMessage.id,
 				result: result
 			};
+			traceSendingResponse(message, method, startTime);
 			messageWriter.write(message);
 		}
 
+		traceReceviedRequest(requestMessage);
+
 		let requestHandler = requestHandlers[requestMessage.method];
+		let startTime = Date.now();
 		if (requestHandler) {
 			let cancellationSource = new CancellationTokenSource();
 			let tokenKey = String(requestMessage.id);
@@ -394,37 +400,37 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 				let promise = <Thenable<any | ResponseError<any>>>handlerResult;
 				if (!handlerResult) {
 					delete requestTokens[tokenKey];
-					replySuccess(handlerResult);
+					replySuccess(handlerResult, requestMessage.method, startTime);
 				} else if (promise.then) {
 					promise.then((resultOrError): any | ResponseError<any>  => {
 						delete requestTokens[tokenKey];
-						reply(resultOrError);
+						reply(resultOrError, requestMessage.method, startTime);
 					}, error => {
 						delete requestTokens[tokenKey];
 						if (error instanceof ResponseError) {
-							replyError(<ResponseError<any>>error);
+							replyError(<ResponseError<any>>error, requestMessage.method, startTime);
 						} else if (error && is.string(error.message)) {
-							replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed with message: ${error.message}`));
+							replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed with message: ${error.message}`), requestMessage.method, startTime);
 						} else {
-							replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed unexpectedly without providing any details.`));
+							replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed unexpectedly without providing any details.`), requestMessage.method, startTime);
 						}
 					});
 				} else {
 					delete requestTokens[tokenKey];
-					reply(handlerResult);
+					reply(handlerResult, requestMessage.method, startTime);
 				}
 			} catch (error) {
 				delete requestTokens[tokenKey];
 				if (error instanceof ResponseError) {
-					reply(<ResponseError<any>>error);
+					reply(<ResponseError<any>>error, requestMessage.method, startTime);
 				} else if (error && is.string(error.message)) {
-					replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed with message: ${error.message}`));
+					replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed with message: ${error.message}`), requestMessage.method, startTime);
 				} else {
-					replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed unexpectedly without providing any details.`));
+					replyError(new ResponseError<void>(ErrorCodes.InternalError, `Request ${requestMessage.method} failed unexpectedly without providing any details.`), requestMessage.method, startTime);
 				}
 			}
 		} else {
-			replyError(new ResponseError<void>(ErrorCodes.MethodNotFound, `Unhandled method ${requestMessage.method}`));
+			replyError(new ResponseError<void>(ErrorCodes.MethodNotFound, `Unhandled method ${requestMessage.method}`), requestMessage.method, startTime);
 		}
 	}
 
@@ -436,13 +442,11 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 
 		let key = String(responseMessage.id);
 		let responsePromise = responsePromises[key];
-		if (trace != Trace.Off && tracer) {
-			traceResponse(responseMessage, responsePromise);
-		}
+		traceReceviedResponse(responseMessage, responsePromise);
 		if (responsePromise) {
 			delete responsePromises[key];
 			try {
-				if (is.defined(responseMessage.error)) {
+				if (responseMessage.error && is.defined(responseMessage.error)) {
 					let error = responseMessage.error;
 					responsePromise.reject(new ResponseError(error.code, error.message, error.data));
 				} else if (is.defined(responseMessage.result)) {
@@ -479,9 +483,7 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 		}
 		if (notificationHandler) {
 			try {
-				if (trace != Trace.Off && tracer) {
-					traceReceivedNotification(message);
-				}
+				traceReceivedNotification(message);
 				if (is.nil(message.params)) {
 					notificationHandler();
 				} else if (is.array(message.params)) {
@@ -518,8 +520,11 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 		}
 	}
 
-	function traceRequest(message: RequestMessage): void {
-		let data: string = undefined;
+	function traceSendingRequest(message: RequestMessage): void {
+		if (trace === Trace.Off || !tracer) {
+			return;
+		}
+		let data: string | undefined = undefined;
 		if (trace === Trace.Verbose && message.params) {
 			data = `Params: ${JSON.stringify(message.params, null, 4)}\n\n`;
 		}
@@ -527,7 +532,10 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 	}
 
 	function traceSendNotification(message: NotificationMessage): void {
-		let data: string = undefined;
+		if (trace === Trace.Off || !tracer) {
+			return;
+		}
+		let data: string | undefined = undefined;
 		if (trace === Trace.Verbose) {
 			if (message.params) {
 				data = `Params: ${JSON.stringify(message.params, null, 4)}\n\n`;
@@ -538,11 +546,41 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 		tracer.log(`Sending notification '${message.method}'.`, data);
 	}
 
-	function traceReceivedNotification(message: NotificationMessage): void {
-		if (message.method === LogTraceNotification.type.method) {
+	function traceSendingResponse(message: ResponseMessage, method: string, startTime: number): void  {
+		if (trace === Trace.Off || !tracer) {
 			return;
 		}
-		let data: string = undefined;
+		let data: string | undefined = undefined;
+		if (trace === Trace.Verbose) {
+			if (message.error && message.error.data) {
+				data = `Error data: ${JSON.stringify(message.error.data, null, 4)}\n\n`;
+			} else {
+				if (message.result) {
+					data = `Result: ${JSON.stringify(message.result, null, 4)}\n\n`;
+				} else if (is.undefined(message.error)) {
+					data = 'No result returned.\n\n';
+				}
+			}
+		}
+		tracer.log(`Sending response '${method} - (${message.id})'. Processing request took ${Date.now() - startTime}ms`)
+	}
+
+	function traceReceviedRequest(message: RequestMessage): void {
+		if (trace === Trace.Off || !tracer) {
+			return;
+		}
+		let data: string | undefined = undefined;
+		if (trace === Trace.Verbose && message.params) {
+			data = `Params: ${JSON.stringify(message.params, null, 4)}\n\n`;
+		}
+		tracer.log(`Received request '${message.method} - (${message.id})'.`, data);
+	}
+
+	function traceReceivedNotification(message: NotificationMessage): void {
+		if (trace === Trace.Off || !tracer || message.method === LogTraceNotification.type.method) {
+			return;
+		}
+		let data: string | undefined = undefined;
 		if (trace === Trace.Verbose) {
 			if (message.params) {
 				data = `Params: ${JSON.stringify(message.params, null, 4)}\n\n`;
@@ -553,8 +591,11 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 		tracer.log(`Received notification '${message.method}'.`, data);
 	}
 
-	function traceResponse(message: ResponseMessage, responsePromise: ResponsePromise): void {
-		let data: string = undefined;
+	function traceReceviedResponse(message: ResponseMessage, responsePromise: ResponsePromise): void {
+		if (trace === Trace.Off || !tracer) {
+			return;
+		}
+		let data: string | undefined = undefined;
 		if (trace === Trace.Verbose) {
 			if (message.error && message.error.data) {
 				data = `Error data: ${JSON.stringify(message.error.data, null, 4)}\n\n`;
@@ -605,7 +646,7 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 		sendNotification: (type: string | MessageType, ...params: any[]): void => {
 			throwIfClosedOrDisposed();
 
-			let messageParams: any[];
+			let messageParams: any[] | null;
 			switch (params.length) {
 				case 0:
 					messageParams = null;
@@ -622,9 +663,7 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 				method: is.string(type) ? type : type.method,
 				params: messageParams
 			}
-			if (trace != Trace.Off && tracer) {
-				traceSendNotification(notificatioMessage);
-			}
+			traceSendNotification(notificatioMessage);
 			messageWriter.write(notificatioMessage);
 		},
 		onNotification: (type: string | MessageType, handler: GenericNotificationHandler): void => {
@@ -636,8 +675,8 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 			throwIfClosedOrDisposed();
 
 			const method = is.string(type) ? type : type.method;
-			let messageParams: any[];
-			let token: CancellationToken = undefined;
+			let messageParams: any[] | null;
+			let token: CancellationToken | undefined = undefined;
 			switch (params.length) {
 				case 0:
 					messageParams = null;
@@ -673,10 +712,8 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 					method: method,
 					params: messageParams
 				}
-				let responsePromise: ResponsePromise = { method: method, timerStart: Date.now(), resolve, reject };
-				if (trace != Trace.Off && tracer) {
-					traceRequest(requestMessage);
-				}
+				let responsePromise: ResponsePromise | null = { method: method, timerStart: Date.now(), resolve, reject };
+				traceSendingRequest(requestMessage);
 				try {
 					messageWriter.write(requestMessage);
 				} catch (e) {
@@ -689,7 +726,7 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 				}
 			});
 			if (token) {
-				token.onCancellationRequested((event) => {
+				token.onCancellationRequested(() => {
 					connection.sendNotification(CancelNotification.type, { id });
 				});
 			}
@@ -703,7 +740,7 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 		trace: (_value: Trace, _tracer: Tracer, sendNotification: boolean = false) => {
 			trace = _value;
 			if (trace === Trace.Off) {
-				tracer = null;
+				tracer = undefined;
 			} else {
 				tracer = _tracer;
 			}
@@ -738,7 +775,7 @@ function _createMessageConnection(messageReader: MessageReader, messageWriter: M
 	};
 
 	connection.onNotification(LogTraceNotification.type, (params) => {
-		if (trace === Trace.Off) {
+		if (trace === Trace.Off || !tracer) {
 			return;
 		}
 		tracer.log(params.message, trace === Trace.Verbose ? params.verbose : undefined);

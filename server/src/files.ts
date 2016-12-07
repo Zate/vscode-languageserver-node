@@ -8,10 +8,10 @@ import * as url from 'url';
 import * as path from 'path';
 import { exec, spawnSync, fork, ChildProcess } from 'child_process';
 
-export function uriToFilePath(uri: string): string {
+export function uriToFilePath(uri: string): string | undefined {
 	let parsed = url.parse(uri);
 	if (parsed.protocol !== 'file:' || !parsed.path) {
-		return null;
+		return undefined;
 	}
 	let segments = parsed.path.split('/');
 	for (var i = 0, len = segments.length; i < len; i++) {
@@ -43,12 +43,11 @@ export function resolveModule(workspaceRoot: string, moduleName: string): Thenab
 	}
 	let nodePathKey: string = 'NODE_PATH';
 	return new Promise<any>((resolve, reject) => {
-		let result = Object.create(null);
 		let nodePath: string[] = [];
 		if (workspaceRoot) {
 			nodePath.push(path.join(workspaceRoot, 'node_modules'));
 		}
-		exec('npm config get prefix', (error: Error, stdout: Buffer, stderr: Buffer) => {
+		exec('npm config get prefix', (error: Error, stdout: Buffer, _stderr: Buffer) => {
 			if (!error) {
 				let globalPath = stdout.toString().replace(/[\s\r\n]+$/, '');
 				if (globalPath.length > 0) {
@@ -97,13 +96,15 @@ export function resolveModule(workspaceRoot: string, moduleName: string): Thenab
 }
 
 
-export function resolveModulePath(workspaceRoot: string, moduleName: string, nodePath: string, tracer: (message: string, verbose?: string) => void): Thenable<string> {
+export function resolve(moduleName: string, nodePath: string | undefined, cwd: string, tracer: (message: string, verbose?: string) => void): Thenable<string> {
 	interface Message {
 		c: string;
 		s?: boolean;
 		a?: any;
 		r?: any
 	}
+
+	const nodePathKey: string = 'NODE_PATH';
 
 	const app: string = [
 		"var p = process;",
@@ -123,58 +124,16 @@ export function resolveModulePath(workspaceRoot: string, moduleName: string, nod
 		"});"
 	].join('');
 
-	const nodePathKey: string = 'NODE_PATH';
-
-	function getGlobalNodePath(): string {
-		let npmCommand = isWindows() ? 'npm.cmd' : 'npm';
-
-		let stdout = spawnSync(npmCommand, ['config', 'get', 'prefix'], {
-			encoding: 'utf8'
-		}).stdout;
-		if (!stdout) {
-			if (tracer) {
-				tracer(`'npm config get prefix' didn't return a value.`);
-			}
-			return undefined;
-		}
-		let prefix = stdout.trim();
-		if (tracer) {
-			tracer(`'npm config get prefix' value is: ${prefix}`);
-		}
-
-		if (prefix.length > 0) {
-			if (isWindows()) {
-				return path.join(prefix, 'node_modules');
-			} else {
-				return path.join(prefix, 'lib', 'node_modules');
-			}
-		}
-		return undefined;
-	}
-
-	if (nodePath && !path.isAbsolute(nodePath)) {
-		nodePath = path.join(workspaceRoot, nodePath);
-	}
-
-	let nodePaths: string[] = [];
-	if (nodePath) {
-		nodePaths.push(nodePath);
-	}
-	let global = getGlobalNodePath();
-	if (global) {
-		nodePaths.push(global);
-	}
-
 	return new Promise<any>((resolve, reject) => {
 		let env = process.env;
 		let newEnv = Object.create(null);
 		Object.keys(env).forEach(key => newEnv[key] = env[key]);
 
-		if (nodePaths.length > 0) {
+		if (nodePath) {
 			if (newEnv[nodePathKey]) {
-				newEnv[nodePathKey] = nodePaths.join(path.delimiter) + path.delimiter + newEnv[nodePathKey];
+				newEnv[nodePathKey] = nodePath + path.delimiter + newEnv[nodePathKey];
 			} else {
-				newEnv[nodePathKey] = nodePaths.join(path.delimiter);
+				newEnv[nodePathKey] = nodePath;
 			}
 			if (tracer) {
 				tracer(`NODE_PATH value is: ${newEnv[nodePathKey]}`);
@@ -182,19 +141,22 @@ export function resolveModulePath(workspaceRoot: string, moduleName: string, nod
 		}
 		newEnv['ATOM_SHELL_INTERNAL_RUN_AS_NODE'] = '1';
 		try {
-			let cp: ChildProcess = fork('', [], <any>{
-				cwd: workspaceRoot,
+			let cp: ChildProcess = fork('', [], <any> {
+				cwd: cwd,
 				env: newEnv,
 				execArgv: ['-e', app]
 			});
+			cp.on('error', (error: any) => {
+				reject(error);
+			});
 			cp.on('message', (message: Message) => {
 				if (message.c === 'r') {
-					let toRequire: string = moduleName;
-					if (message.s) {
-						toRequire = message.r;
-					}
 					cp.send({ c: 'e' });
-					resolve(toRequire);
+					if (message.s) {
+						resolve(message.r);
+					} else {
+						reject(new Error(`Failed to resolve module: ${moduleName}`));
+					}
 				}
 			});
 			let message: Message = {
@@ -206,6 +168,54 @@ export function resolveModulePath(workspaceRoot: string, moduleName: string, nod
 			reject(error);
 		}
 	});
+
+}
+
+export function resolveGlobalNodePath(tracer?: (message: string) => void): string | undefined {
+	let npmCommand = isWindows() ? 'npm.cmd' : 'npm';
+
+	let stdout = spawnSync(npmCommand, ['config', 'get', 'prefix'], {
+		encoding: 'utf8'
+	}).stdout;
+
+	if (!stdout) {
+		if (tracer) {
+			tracer(`'npm config get prefix' didn't return a value.`);
+		}
+		return undefined;
+	}
+	let prefix = stdout.trim();
+	if (tracer) {
+		tracer(`'npm config get prefix' value is: ${prefix}`);
+	}
+
+	if (prefix.length > 0) {
+		if (isWindows()) {
+			return path.join(prefix, 'node_modules');
+		} else {
+			return path.join(prefix, 'lib', 'node_modules');
+		}
+	}
+	return undefined;
+}
+
+export function resolveModulePath(workspaceRoot: string, moduleName: string, nodePath: string, tracer: (message: string, verbose?: string) => void): Thenable<string> {
+	if (nodePath) {
+		if (!path.isAbsolute(nodePath)) {
+			nodePath = path.join(workspaceRoot, nodePath);
+		}
+		return resolve(moduleName, nodePath, nodePath, tracer).then((value) => {
+			if (value.indexOf(path.normalize(nodePath)) === 0) {
+				return value;
+			} else {
+				return Promise.reject<string>(new Error(`Failed to load ${moduleName} from node path location.`));
+			}
+		}).then(undefined, (_error: any) => {
+			return resolve(moduleName, resolveGlobalNodePath(tracer), workspaceRoot, tracer);
+		});
+	} else {
+		return resolve(moduleName, resolveGlobalNodePath(tracer), workspaceRoot, tracer);
+	}
 }
 
 /**
@@ -215,6 +225,9 @@ export function resolveModulePath(workspaceRoot: string, moduleName: string, nod
 export function resolveModule2(workspaceRoot: string, moduleName: string, nodePath: string, tracer: (message: string, verbose?: string) => void): Thenable<any> {
 
 	return resolveModulePath(workspaceRoot, moduleName, nodePath, tracer).then((path) => {
+		if (tracer) {
+			tracer(`Module ${moduleName} got resolved to ${path}`);
+		}
 		return require(path);
 	});
 }
