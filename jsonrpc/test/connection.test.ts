@@ -13,7 +13,7 @@ import { Message, RequestMessage, RequestType, RequestType3, ResponseMessage, Re
 import { StreamMessageReader } from '../messageReader';
 import { CancellationTokenSource } from '../cancellation';
 
-import * as hostConnection from '../main';
+import * as hostConnection from '../vscode-jsonrpc';
 
 interface TestWritable extends Writable {
 	constructor: Function;

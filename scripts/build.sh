@@ -44,30 +44,30 @@ echo "########"
   echo "########" \
 )
 
-( \
-  echo "########" && \
-  cd server && \
-  echo "`pwd`" && \
-  npm unlink  && \
-  npm link "vscode-jsonrpc" && \
-  npm link "vscode-languageserver-types" && \
-  npm install && \
-  npm run compile && \
-  npm link && \
-  echo "########" \
-)
+# ( \
+#   echo "########" && \
+#   cd server && \
+#   echo "`pwd`" && \
+#   npm unlink  && \
+#   npm link "vscode-jsonrpc" && \
+#   npm link "vscode-languageserver-types" && \
+#   npm install && \
+#   npm run compile && \
+#   npm link && \
+#   echo "########" \
+# )
 
-( \
-  echo "########" && \
-  cd client.tests && \
-  echo "`pwd`" && \
-  npm unlink  && \
-  npm link "vscode-languageserver-types" && \
-  npm install && \
-  npm run compile && \
-  npm link && \
-  echo "########" \
-)
+# ( \
+#   echo "########" && \
+#   cd client.tests && \
+#   echo "`pwd`" && \
+#   npm unlink  && \
+#   npm link "vscode-languageserver-types" && \
+#   npm install && \
+#   npm run compile && \
+#   npm link && \
+#   echo "########" \
+# )
 
 ( \
   echo "########" && \

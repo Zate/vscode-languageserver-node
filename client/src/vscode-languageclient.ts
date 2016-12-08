@@ -28,7 +28,7 @@ import {
 } from 'vscode-jsonrpc';
 
 import {
-		WorkspaceEdit
+		WorkspaceEdit, TextEdit
 } from 'vscode-languageserver-types';
 
 
@@ -80,7 +80,7 @@ export { Converter as Code2ProtocolConverter } from './codeConverter';
 export { Converter as Protocol2CodeConverter } from './protocolConverter';
 
 export * from 'vscode-languageserver-types';
-export * from './protocol';
+// export * from './protocol';
 
 declare var v8debug: any;
 
@@ -399,7 +399,8 @@ class DocumentNotifiactions<P, E> implements FeatureHandler<DocumentOptions> {
 	protected _selectors: Map<string, DocumentSelector> = new Map<string, DocumentSelector>();
 
 	public static textDocumentFilter(selectors: IterableIterator<DocumentOptions>, textDocument: TextDocument): boolean {
-		for (const selector of selectors) {
+		let items = Array.from(selectors);
+		for (const selector of items) {
 			if (Languages.match(selector, textDocument)) {
 				return true;
 			}
@@ -540,7 +541,8 @@ class DidChangeTextDocumentFeature implements FeatureHandler<DidChangeTextDocume
 	}
 
 	private callback(event: TextDocumentChangeEvent): void {
-		for (const changeData of this._changeData.values()) {
+		let items = Array.from(this._changeData.values());
+		for (const changeData of items) {
 			if (Languages.match(changeData.documentSelector, event.document)) {
 				if (changeData.syncKind === TextDocumentSyncKind.Incremental) {
 					this._client.sendNotification(DidChangeTextDocumentNotification.type, this._client.code2ProtocolConverter.asChangeTextDocumentParams(event));
@@ -622,7 +624,7 @@ class WillSaveWaitUntilFeature implements FeatureHandler<DocumentOptions> {
 				this._client.sendRequest(
 					WillSaveTextDocumentWaitUntilRequest.type,
 					this._client.code2ProtocolConverter.asWillSaveTextDocumentParams(event)
-				).then((edits) => {
+				).then((edits: TextEdit[]) => {
 					return this._client.protocol2CodeConverter.asTextEdits(edits);
 				})
 			);
@@ -1630,7 +1632,7 @@ export class LanguageClient {
 	}
 
 	private handleRegistrationRequest(params: RegistrationParams): Thenable<void> {
-		return new Promise((resolve, _reject) => {
+		return new Promise<void>((resolve, _reject) => {
 			params.registrations.forEach((element) => {
 				const handler = this._registeredHandlers.get(element.method);
 				const options = element.registerOptions || {};
@@ -1644,7 +1646,7 @@ export class LanguageClient {
 	}
 
 	private handleUnregistrationRequest(params: UnregistrationParams): Thenable<void> {
-		return new Promise((resolve, _reject) => {
+		return new Promise<void>((resolve, _reject) => {
 			params.unregisterations.forEach((element) => {
 				const handler = this._registeredHandlers.get(element.method);
 				if (handler) {

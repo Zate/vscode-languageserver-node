@@ -1,18 +1,22 @@
 {
 	"compilerOptions": {
 		"target": "es5",
-		"module": "umd",
+		"module": "amd",
 		"moduleResolution": "node",
 		"sourceMap": true,
-		"declaration": true,
 		"stripInternal": true,
 		"lib": [ "es2015", "es2015.promise" ],
+		"declaration": true,
 		"outDir": "../lib",
+		"outFile": "../lib/main.js",
 		"strictNullChecks": true,
-		"noImplicitAny": true,
+		"noImplicitAny": false,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true
-	}
+	},
+    "exclude": [
+        "node_modules"
+    ]
 }

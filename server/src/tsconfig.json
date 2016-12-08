@@ -1,15 +1,16 @@
 {
 	"compilerOptions": {
 		"target": "es6",
-		"module": "commonjs",
+		"module": "amd",
 		"moduleResolution": "node",
 		"sourceMap": false,
 		"declaration": true,
 		"stripInternal": true,
 		"lib": [ "es2016" ],
 		"outDir": "../lib",
+		"outFile": "../lib/main.js",
 		"strictNullChecks": true,
-		"noImplicitAny": true,
+		"noImplicitAny": false,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"noUnusedLocals": true,

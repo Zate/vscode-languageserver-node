@@ -1,13 +1,16 @@
 {
 	"compilerOptions": {
 		"target": "es6",
-		"module": "commonjs",
+		"module": "amd",
 		"moduleResolution": "node",
 		"sourceMap": false,
 		"inlineSources": false,
 		"declaration": true,
 		"stripInternal": true,
 		"lib": [ "es6" ],
-		"outDir": "../lib"
-	}
+		"outFile": "../lib/main.js"
+	},
+    "exclude": [
+        "node_modules"
+    ]
 }

@@ -11,11 +11,11 @@
 	"bugs": {
 		"url": "https://github.com/Microsoft/vscode-languageserver-node/issues"
 	},
-	"main": "./lib/main.js",
 	"bin": {
 		"installServerIntoExtension": "./bin/installServerIntoExtension"
 	},
-	"typings": "./lib/main",
+	"main": "./lib/main.js",
+	"typings": "./lib/main.d.ts",
 	"devDependencies": {
 		"mocha": "3.0.2",
 		"typescript": "^2.0.10",

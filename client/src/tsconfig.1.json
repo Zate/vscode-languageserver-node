@@ -4,10 +4,9 @@
 		"module": "amd",
 		"moduleResolution": "node",
 		"sourceMap": true,
-		"stripInternal": true,
-		"lib": [ "es2015" ],
 		"declaration": true,
-		"outDir": "../lib",
+		"stripInternal": true,
+		"lib": [ "es2016" ],
 		"outFile": "../lib/main.js",
 		"strictNullChecks": true,
 		"noImplicitAny": false,
@@ -15,5 +14,8 @@
 		"noImplicitThis": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true
-	}
+	},
+    "exclude": [
+        "node_modules"
+    ]
 }

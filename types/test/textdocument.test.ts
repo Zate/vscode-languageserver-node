@@ -5,7 +5,7 @@
 'use strict';
 
 import assert = require('assert');
-import {TextDocument, Position} from '../main';
+import {TextDocument, Position} from '../vscode-languageserver-types';
 
 suite('Text Document Lines Model Validator', () => {
 	function newDocument(str:string) {
