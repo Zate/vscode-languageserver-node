@@ -25,12 +25,23 @@ language servers for [VSCode](https://code.visualstudio.com/).
 ## History
 
 * 3.0.0-alpha.x: Client, Server and JSON-RPC
-  * Moved all libraries to TypeScript 2.0.3
+  * Moved all libraries to TypeScript 2.x.x
   * Client and Server are compiled to ES6. JSON-RPC is still compiled to ES5.
   * JSON-RPC supports n parameter request and notification invocation
+  * Support for snippets in completion items:
+    * New type `SnippetText`
+    * CompletionItem.insertText can now also be a SnippetText.
+    * Added CompletionItem.range
+    * Deprecated CompletionItem.textEdit
   * Breaking changes:
-    * due to the use of TypeScript 2.0.3 and differences in d.ts generation users of the new version need to move to 
-      TypeScript 2.0.3 as well.
+    * to ensure ordered delivery of notifications and requests the language client now throws if sendRequest, onRequest,
+      sendNotification or onNotification is called before the client is ready. Use the isReady() Promise to wait until
+      the client is ready.
+    * removed the deprecated module functions on code2Protocol and protocol2Code converters. Use the corresponding
+      properties on the LanguageClient instead to get access to the same converters used by the LanguageClient.
+    * due to the use of TypeScript 2.x.x and differences in d.ts generation users of the new version need to move to 
+      TypeScript 2.x.x as well.
+    * `activeSignature` and `activeParameter` where incorrectly declared as optional in `SignatureHelp`. They are now mandantory.
     * Request and notification types have an additional property '_'. This property is to improve TypeScript type 
       inference and can savely be set to undefined when a request of notification type is created. For example:
 ```ts
@@ -42,6 +53,7 @@ export namespace CompletionRequest {
 }
 ```
 
+    
 * 2.6.0: Client and Server
   * Support for Document Link Providers
   * Support for additional text edits and commands in completion items.

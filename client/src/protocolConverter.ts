@@ -14,65 +14,97 @@ export interface Converter {
 
 	asUri(value: string): code.Uri;
 
-	asDiagnostics(diagnostics: ls.Diagnostic[]): code.Diagnostic[];
-
 	asDiagnostic(diagnostic: ls.Diagnostic): code.Diagnostic;
 
-	asRange(value: ls.Range): code.Range;
+	asDiagnostics(diagnostics: ls.Diagnostic[]): code.Diagnostic[];
 
+	asPosition(value: undefined | null): undefined;
 	asPosition(value: ls.Position): code.Position;
+	asPosition(value: ls.Position | undefined | null): code.Position | undefined;
 
-	asDiagnosticSeverity(value: number): code.DiagnosticSeverity;
+	asRange(value: undefined | null): undefined;
+	asRange(value: ls.Range): code.Range;
+	asRange(value: ls.Range | undefined | null): code.Range | undefined;
+
+	asDiagnosticSeverity(value: number | undefined | null): code.DiagnosticSeverity;
 
 	asHover(hover: ls.Hover): code.Hover;
+	asHover(hover: undefined | null): undefined;
+	asHover(hover: ls.Hover | undefined | null): code.Hover | undefined;
 
-	asCompletionResult(result: ls.CompletionItem[] | ls.CompletionList): code.CompletionItem[] | code.CompletionList
+	asCompletionResult(result: ls.CompletionItem[] | ls.CompletionList): code.CompletionItem[] | code.CompletionList;
+	asCompletionResult(result: undefined | null): undefined;
+	asCompletionResult(result: ls.CompletionItem[] | ls.CompletionList | undefined | null): code.CompletionItem[] | code.CompletionList | undefined;
 
 	asCompletionItem(item: ls.CompletionItem): ProtocolCompletionItem;
 
 	asTextEdit(edit: ls.TextEdit): code.TextEdit;
 
 	asTextEdits(items: ls.TextEdit[]): code.TextEdit[];
+	asTextEdits(items: undefined | null): undefined;
+	asTextEdits(items: ls.TextEdit[] | undefined | null): code.TextEdit[] | undefined;
 
+	asSignatureHelp(item: undefined | null): undefined;
 	asSignatureHelp(item: ls.SignatureHelp): code.SignatureHelp;
-
-	asSignatureInformations(items: ls.SignatureInformation[]): code.SignatureInformation[];
+	asSignatureHelp(item: ls.SignatureHelp | undefined | null): code.SignatureHelp | undefined;
 
 	asSignatureInformation(item: ls.SignatureInformation): code.SignatureInformation;
 
-	asParameterInformations(item: ls.ParameterInformation[]): code.ParameterInformation[];
+	asSignatureInformations(items: ls.SignatureInformation[]): code.SignatureInformation[];
 
 	asParameterInformation(item: ls.ParameterInformation): code.ParameterInformation;
 
+	asParameterInformations(item: ls.ParameterInformation[]): code.ParameterInformation[];
+
 	asDefinitionResult(item: ls.Definition): code.Definition;
+	asDefinitionResult(item: undefined | null): undefined;
+	asDefinitionResult(item: ls.Definition | undefined | null): code.Definition | undefined;
 
 	asLocation(item: ls.Location): code.Location;
+	asLocation(item: undefined | null): undefined;
+	asLocation(item: ls.Location | undefined | null): code.Location | undefined;
 
 	asReferences(values: ls.Location[]): code.Location[];
-
-	asDocumentHighlights(values: ls.DocumentHighlight[]): code.DocumentHighlight[];
-
-	asDocumentHighlight(item: ls.DocumentHighlight): code.DocumentHighlight;
+	asReferences(values: undefined | null): code.Location[] | undefined;
+	asReferences(values: ls.Location[] | undefined | null): code.Location[] | undefined;
 
 	asDocumentHighlightKind(item: ls.DocumentHighlightKind): code.DocumentHighlightKind;
 
-	asSymbolInformations(values: ls.SymbolInformation[], uri?: code.Uri): code.SymbolInformation[];
+	asDocumentHighlight(item: ls.DocumentHighlight): code.DocumentHighlight;
+
+	asDocumentHighlights(values: ls.DocumentHighlight[]): code.DocumentHighlight[];
+	asDocumentHighlights(values: undefined | null): undefined;
+	asDocumentHighlights(values: ls.DocumentHighlight[] | undefined | null): code.DocumentHighlight[] | undefined;
 
 	asSymbolInformation(item: ls.SymbolInformation, uri?: code.Uri): code.SymbolInformation;
+
+	asSymbolInformations(values: ls.SymbolInformation[], uri?: code.Uri): code.SymbolInformation[];
+	asSymbolInformations(values: undefined | null, uri?: code.Uri): undefined;
+	asSymbolInformations(values: ls.SymbolInformation[] | undefined | null, uri?: code.Uri): code.SymbolInformation[] | undefined;
 
 	asCommand(item: ls.Command): code.Command;
 
 	asCommands(items: ls.Command[]): code.Command[];
+	asCommands(items: undefined | null): undefined
+	asCommands(items: ls.Command[] | undefined | null): code.Command[] | undefined;
 
 	asCodeLens(item: ls.CodeLens): code.CodeLens;
+	asCodeLens(item: undefined | null): undefined;
+	asCodeLens(item: ls.CodeLens | undefined | null): code.CodeLens | undefined;
 
 	asCodeLenses(items: ls.CodeLens[]): code.CodeLens[];
+	asCodeLenses(items: undefined | null): undefined;
+	asCodeLenses(items: ls.CodeLens[] | undefined | null): code.CodeLens[] | undefined;
 
 	asWorkspaceEdit(item: ls.WorkspaceEdit): code.WorkspaceEdit;
+	asWorkspaceEdit(item: undefined | null): undefined;
+	asWorkspaceEdit(item: ls.WorkspaceEdit | undefined | null): code.WorkspaceEdit | undefined;
 
 	asDocumentLink(item: ls.DocumentLink): code.DocumentLink;
 
 	asDocumentLinks(items: ls.DocumentLink[]): code.DocumentLink[];
+	asDocumentLinks(items: undefined | null): undefined;
+	asDocumentLinks(items: ls.DocumentLink[] | undefined | null): code.DocumentLink[] | undefined;
 }
 
 export interface URIConverter {
@@ -94,36 +126,38 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 	}
 
 	function asDiagnostic(diagnostic: ls.Diagnostic): code.Diagnostic {
-		let result = new code.Diagnostic(asRange(diagnostic.range), diagnostic.message, asDiagnosticSeverity(diagnostic.severity));
-		if (is.defined(diagnostic.code)) {
-			result.code = diagnostic.code;
+		let result = new code.Diagnostic(asRange(diagnostic.range)!, diagnostic.message, asDiagnosticSeverity(diagnostic.severity));
+		if (diagnostic.code) {
+			result.code = diagnostic.code!;
 		}
-		if (is.defined(diagnostic.source)) {
-			result.source = diagnostic.source;
+		if (diagnostic.source) {
+			result.source = diagnostic.source!;
 		}
 		return result;
 	}
 
-	function asRange(value: ls.Range): code.Range {
-		if (is.undefined(value)) {
+	function asPosition(value: undefined | null): undefined;
+	function asPosition(value: ls.Position): code.Position;
+	function asPosition(value: ls.Position | undefined | null): code.Position | undefined;
+	function asPosition(value: ls.Position | undefined | null): code.Position | undefined {
+		if (!value) {
 			return undefined;
-		} else if (is.nil(value)) {
-			return null;
-		}
-		return new code.Range(asPosition(value.start), asPosition(value.end));
-	}
-
-	function asPosition(value: ls.Position): code.Position {
-		if (is.undefined(value)) {
-			return undefined;
-		} else if (is.nil(value)) {
-			return null;
 		}
 		return new code.Position(value.line, value.character);
 	}
 
-	function asDiagnosticSeverity(value: number): code.DiagnosticSeverity {
-		if (is.undefined(value) || is.nil(value)) {
+	function asRange(value: undefined | null): undefined;
+	function asRange(value: ls.Range): code.Range;
+	function asRange(value: ls.Range | undefined | null): code.Range | undefined;
+	function asRange(value: ls.Range | undefined | null): code.Range | undefined {
+		if (!value) {
+			return undefined;
+		}
+		return new code.Range(asPosition(value.start), asPosition(value.end));
+	}
+
+	function asDiagnosticSeverity(value: number | undefined | null): code.DiagnosticSeverity {
+		if (value === void 0 || value === null) {
 			return code.DiagnosticSeverity.Error;
 		}
 		switch (value) {
@@ -139,60 +173,92 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 		return code.DiagnosticSeverity.Error;
 	}
 
-	function asHover(hover: ls.Hover): code.Hover {
-		if (is.undefined(hover)) {
+	function asHover(hover: ls.Hover): code.Hover;
+	function asHover(hover: undefined | null): undefined;
+	function asHover(hover: ls.Hover | undefined | null): code.Hover | undefined;
+	function asHover(hover: ls.Hover | undefined | null): code.Hover | undefined {
+		if (!hover) {
 			return undefined;
 		}
-		if (is.nil(hover)) {
-			return null;
-		}
-		return new code.Hover(hover.contents, is.defined(hover.range) ? asRange(hover.range) : undefined);
+		return new code.Hover(hover.contents, asRange(hover.range));
 	}
 
-	function asCompletionResult(result: ls.CompletionItem[] | ls.CompletionList): code.CompletionItem[] | code.CompletionList {
+	function asCompletionResult(result: ls.CompletionItem[] | ls.CompletionList): code.CompletionItem[] | code.CompletionList;
+	function asCompletionResult(result: undefined | null): undefined;
+	function asCompletionResult(result: ls.CompletionItem[] | ls.CompletionList | undefined | null): code.CompletionItem[] | code.CompletionList | undefined;
+	function asCompletionResult(result: ls.CompletionItem[] | ls.CompletionList | undefined | null): code.CompletionItem[] | code.CompletionList | undefined {
+		if (!result) {
+			return undefined;
+		}
 		if (Array.isArray(result)) {
 			let items = <ls.CompletionItem[]> result;
 			return items.map(asCompletionItem);
 		}
-		let list = <code.CompletionList> result;
+		let list = <ls.CompletionList> result;
 		return new code.CompletionList(list.items.map(asCompletionItem), list.isIncomplete);
-	}
-
-	function set<T>(value: T, func: () => void): void {
-		if (is.defined(value)) {
-			func();
-		}
 	}
 
 	function asCompletionItem(item: ls.CompletionItem): ProtocolCompletionItem {
 		let result = new ProtocolCompletionItem(item.label);
-		set(item.detail, () => result.detail = item.detail);
-		set(item.documentation, () => result.documentation = item.documentation);
-		set(item.filterText, () => result.filterText = item.filterText);
-		set(item.insertText, () => result.insertText = item.insertText);
+		if (item.detail) { result.detail = item.detail; }
+		if (item.documentation) { result.documentation = item.documentation };
+		if (item.filterText) { result.filterText = item.filterText; }
+		if (item.insertText) { result.insertText = asCompletionInsertText(item.insertText); }
+		if (item.range) { result.range = asRange(item.range); }
 		// Protocol item kind is 1 based, codes item kind is zero based.
-		set(item.kind, () => result.kind = item.kind - 1);
-		set(item.sortText, () => result.sortText = item.sortText);
-		set(item.textEdit, () => result.textEdit = asTextEdit(item.textEdit));
-		set(item.additionalTextEdits, () => result.additionalTextEdits = asTextEdits(item.additionalTextEdits));
-		set(item.command, () => result.command = asCommand(item.command));
-		set(item.data, () => result.data = item.data);
+		if (item.kind) { result.kind = item.kind - 1; }
+		if (item.sortText) { result.sortText = item.sortText; }
+		if (item.textEdit) { result.textEdit = asTextEdit(item.textEdit); }
+		if (item.additionalTextEdits) { result.additionalTextEdits = asTextEdits(item.additionalTextEdits); }
+		if (item.command) { result.command = asCommand(item.command); }
+		if (item.data) { result.data = item.data; }
 		return result;
 	}
 
-	function asTextEdit(edit: ls.TextEdit): code.TextEdit {
-		return new code.TextEdit(asRange(edit.range), edit.newText);
+	function asCompletionInsertText(text: string | ls.SnippetString | undefined | null): string | code.SnippetString | undefined {
+		if (is.string(text)) {
+			return text;
+		} else if (ls.SnippetString.is(text)) {
+			return new code.SnippetString(text.value);
+		}
+		return undefined;
 	}
 
-	function asTextEdits(items: ls.TextEdit[]): code.TextEdit[] {
+	function asTextEdit(edit: ls.TextEdit): code.TextEdit {
+		return new code.TextEdit(asRange(edit.range)!, edit.newText);
+	}
+
+	function asTextEdits(items: ls.TextEdit[]): code.TextEdit[];
+	function asTextEdits(items: undefined | null): undefined;
+	function asTextEdits(items: ls.TextEdit[] | undefined | null): code.TextEdit[] | undefined;
+	function asTextEdits(items: ls.TextEdit[] | undefined | null): code.TextEdit[] | undefined {
+		if (!items) {
+			return undefined;
+		}
 		return items.map(asTextEdit);
 	}
 
-	function asSignatureHelp(item: ls.SignatureHelp): code.SignatureHelp {
+	function asSignatureHelp(item: undefined | null): undefined;
+	function asSignatureHelp(item: ls.SignatureHelp): code.SignatureHelp;
+	function asSignatureHelp(item: ls.SignatureHelp | undefined | null): code.SignatureHelp | undefined;
+	function asSignatureHelp(item: ls.SignatureHelp | undefined | null): code.SignatureHelp | undefined {
+		if (!item) {
+			return undefined;
+		}
 		let result = new code.SignatureHelp();
-		set(item.activeParameter, () => result.activeParameter = item.activeParameter);
-		set(item.activeSignature, () => result.activeSignature = item.activeSignature);
-		set(item.signatures, () => result.signatures = asSignatureInformations(item.signatures));
+		if (is.number(item.activeSignature)) {
+			result.activeSignature = item.activeSignature;
+		} else {
+			// activeSignature was optional in the past
+			result.activeSignature = 0;
+		}
+		if (is.number(item.activeParameter)) {
+			result.activeParameter = item.activeParameter;
+		} else {
+			// activeParameter was optional in the past
+			result.activeParameter = 0;
+		}
+		if (item.signatures) { result.signatures = asSignatureInformations(item.signatures); }
 		return result;
 	}
 
@@ -202,8 +268,8 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 
 	function asSignatureInformation(item: ls.SignatureInformation): code.SignatureInformation {
 		let result = new code.SignatureInformation(item.label);
-		set(item.documentation, () => result.documentation = item.documentation);
-		set(item.parameters, () => result.parameters = asParameterInformations(item.parameters));
+		if (item.documentation) { result.documentation = item.documentation; }
+		if (item.parameters) { result.parameters = asParameterInformations(item.parameters); }
 		return result;
 	}
 
@@ -213,39 +279,57 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 
 	function asParameterInformation(item: ls.ParameterInformation): code.ParameterInformation {
 		let result = new code.ParameterInformation(item.label);
-		set(item.documentation, () => result.documentation = item.documentation);
+		if (item.documentation) { result.documentation = item.documentation };
 		return result;
 	}
 
-	function asDefinitionResult(item: ls.Definition): code.Definition {
+	function asDefinitionResult(item: ls.Definition): code.Definition;
+	function asDefinitionResult(item: undefined | null): undefined;
+	function asDefinitionResult(item: ls.Definition | undefined | null): code.Definition | undefined;
+	function asDefinitionResult(item: ls.Definition | undefined | null): code.Definition | undefined {
+		if (!item) {
+			return undefined;
+		}
 		if (is.array(item)) {
-			return item.map(asLocation);
+			return item.map((location) => asLocation(location)!);
 		} else {
 			return asLocation(item);
 		}
 	}
 
-	function asLocation(item: ls.Location): code.Location {
-		if (is.undefined(item)) {
+	function asLocation(item: ls.Location): code.Location;
+	function asLocation(item: undefined | null): undefined;
+	function asLocation(item: ls.Location | undefined | null): code.Location | undefined;
+	function asLocation(item: ls.Location | undefined | null): code.Location | undefined {
+		if (!item) {
 			return undefined;
 		}
-		if (is.nil(item)) {
-			return null;
+		return new code.Location(_uriConverter(item.uri), asRange(item.range)!);
+	}
+
+	function asReferences(values: ls.Location[]): code.Location[];
+	function asReferences(values: undefined | null): code.Location[] | undefined;
+	function asReferences(values: ls.Location[] | undefined | null): code.Location[] | undefined;
+	function asReferences(values: ls.Location[] | undefined | null): code.Location[] | undefined {
+		if (!values) {
+			return undefined;
 		}
-		return new code.Location(_uriConverter(item.uri), asRange(item.range));
+		return values.map(location => asLocation(location)!);
 	}
 
-	function asReferences(values: ls.Location[]): code.Location[] {
-		return values.map(asLocation);
-	}
-
-	function asDocumentHighlights(values: ls.DocumentHighlight[]): code.DocumentHighlight[] {
+	function asDocumentHighlights(values: ls.DocumentHighlight[]): code.DocumentHighlight[];
+	function asDocumentHighlights(values: undefined | null): undefined;
+	function asDocumentHighlights(values: ls.DocumentHighlight[] | undefined | null): code.DocumentHighlight[] | undefined;
+	function asDocumentHighlights(values: ls.DocumentHighlight[] | undefined | null): code.DocumentHighlight[] | undefined {
+		if (!values) {
+			return undefined;
+		}
 		return values.map(asDocumentHighlight);
 	}
 
 	function asDocumentHighlight(item: ls.DocumentHighlight): code.DocumentHighlight {
-		let result = new code.DocumentHighlight(asRange(item.range));
-		set(item.kind, () => result.kind = asDocumentHighlightKind(item.kind));
+		let result = new code.DocumentHighlight(asRange(item.range)!);
+		if (item.kind) { result.kind = asDocumentHighlightKind(item.kind); }
 		return result;
 	}
 
@@ -261,7 +345,13 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 		return code.DocumentHighlightKind.Text;
 	}
 
-	function asSymbolInformations(values: ls.SymbolInformation[], uri?: code.Uri): code.SymbolInformation[] {
+	function asSymbolInformations(values: ls.SymbolInformation[], uri?: code.Uri): code.SymbolInformation[];
+	function asSymbolInformations(values: undefined | null, uri?: code.Uri): undefined;
+	function asSymbolInformations(values: ls.SymbolInformation[] | undefined | null, uri?: code.Uri): code.SymbolInformation[] | undefined;
+	function asSymbolInformations(values: ls.SymbolInformation[] | undefined | null, uri?: code.Uri): code.SymbolInformation[] | undefined {
+		if (!values) {
+			return undefined;
+		}
 		return values.map(information => asSymbolInformation(information, uri));
 	}
 
@@ -269,47 +359,79 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 		// Symbol kind is one based in the protocol and zero based in code.
 		let result = new code.SymbolInformation(
 			item.name, item.kind - 1,
-			asRange(item.location.range),
+			asRange(item.location.range)!,
 			item.location.uri ? _uriConverter(item.location.uri) : uri);
-		set(item.containerName, () => result.containerName = item.containerName);
+		if (item.containerName) { result.containerName = item.containerName; }
 		return result;
 	}
 
 	function asCommand(item: ls.Command): code.Command {
 		let result: code.Command = { title: item.title, command: item.command };
-		set(item.arguments, () => result.arguments = item.arguments);
+		if (item.arguments) { result.arguments = item.arguments; }
 		return result;
 	}
 
-	function asCommands(items: ls.Command[]): code.Command[] {
+	function asCommands(items: ls.Command[]): code.Command[];
+	function asCommands(items: undefined | null): undefined
+	function asCommands(items: ls.Command[] | undefined | null): code.Command[] | undefined;
+	function asCommands(items: ls.Command[] | undefined | null): code.Command[] | undefined {
+		if (!items) {
+			return undefined;
+		}
 		return items.map(asCommand);
 	}
 
-	function asCodeLens(item: ls.CodeLens): code.CodeLens {
-		let result: ProtocolCodeLens = new ProtocolCodeLens(asRange(item.range));
-		if (is.defined(item.command)) result.command = asCommand(item.command);
-		if (is.defined(item.data)) result.data = item.data;
+	function asCodeLens(item: ls.CodeLens): code.CodeLens;
+	function asCodeLens(item: undefined | null): undefined;
+	function asCodeLens(item: ls.CodeLens | undefined | null): code.CodeLens | undefined;
+	function asCodeLens(item: ls.CodeLens | undefined | null): code.CodeLens | undefined {
+		if (!item) {
+			return undefined;
+		}
+		let result: ProtocolCodeLens = new ProtocolCodeLens(asRange(item.range)!);
+		if (item.command) { result.command = asCommand(item.command); }
+		if (item.data) { result.data = item.data; }
 		return result;
 	}
 
-	function asCodeLenses(items: ls.CodeLens[]): code.CodeLens[] {
-		return items.map(asCodeLens);
+	function asCodeLenses(items: ls.CodeLens[]): code.CodeLens[];
+	function asCodeLenses(items: undefined | null): undefined;
+	function asCodeLenses(items: ls.CodeLens[] | undefined | null): code.CodeLens[] | undefined;
+	function asCodeLenses(items: ls.CodeLens[] | undefined | null): code.CodeLens[] | undefined {
+		if (!items) {
+			return undefined;
+		}
+		return items.map((codeLens) => asCodeLens(codeLens)!);
 	}
 
-	function asWorkspaceEdit(item: ls.WorkspaceEdit): code.WorkspaceEdit {
+	function asWorkspaceEdit(item: ls.WorkspaceEdit): code.WorkspaceEdit;
+	function asWorkspaceEdit(item: undefined | null): undefined;
+	function asWorkspaceEdit(item: ls.WorkspaceEdit | undefined | null): code.WorkspaceEdit | undefined;
+	function asWorkspaceEdit(item: ls.WorkspaceEdit | undefined | null): code.WorkspaceEdit | undefined {
+		if (!item) {
+			return undefined;
+		}
 		let result = new code.WorkspaceEdit();
-		let keys = Object.keys(item.changes);
-		keys.forEach(key => result.set(_uriConverter(key), asTextEdits(item.changes[key])));
+		item.changes.forEach(change => {
+			result.set(_uriConverter(change.textDocument.uri), asTextEdits(change.edits)!);
+		});
 		return result;
 	}
 
 	function asDocumentLink(item: ls.DocumentLink): code.DocumentLink {
-		let range = asRange(item.range);
-		let target = is.defined(item.target) && asUri(item.target);
-		return new code.DocumentLink(range, target);
+		let range = asRange(item.range)!;
+		let target = item.target ? asUri(item.target!) : undefined;
+		// target must be optional in DocumentLink
+		return new code.DocumentLink(range, target!);
 	}
 
-	function asDocumentLinks(items: ls.DocumentLink[]): code.DocumentLink[] {
+	function asDocumentLinks(items: ls.DocumentLink[]): code.DocumentLink[];
+	function asDocumentLinks(items: undefined | null): undefined;
+	function asDocumentLinks(items: ls.DocumentLink[] | undefined | null): code.DocumentLink[] | undefined;
+	function asDocumentLinks(items: ls.DocumentLink[] | undefined | null): code.DocumentLink[] | undefined {
+		if (!items) {
+			return undefined;
+		}
 		return items.map(asDocumentLink);
 	}
 
@@ -347,37 +469,3 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 		asDocumentLinks
 	}
 }
-
-// This for backward compatibility since we exported the converter functions as API.
-const defaultConverter = createConverter();
-
-export const asDiagnostics: (diagnostics: ls.Diagnostic[]) => code.Diagnostic[] = defaultConverter.asDiagnostics;
-export const asDiagnostic: (diagnostic: ls.Diagnostic) => code.Diagnostic = defaultConverter.asDiagnostic;
-export const asRange: (value: ls.Range) => code.Range = defaultConverter.asRange;
-export const asPosition: (value: ls.Position) => code.Position = defaultConverter.asPosition;
-export const asDiagnosticSeverity: (value: number) => code.DiagnosticSeverity = defaultConverter.asDiagnosticSeverity;
-export const asHover: (hover: ls.Hover) => code.Hover = defaultConverter.asHover;
-export const asCompletionResult: (result: ls.CompletionItem[] | ls.CompletionList) => code.CompletionItem[] | code.CompletionList = defaultConverter.asCompletionResult;
-export const asCompletionItem: (item: ls.CompletionItem) => ProtocolCompletionItem = defaultConverter.asCompletionItem;
-export const asTextEdit: (edit: ls.TextEdit) => code.TextEdit = defaultConverter.asTextEdit;
-export const asTextEdits: (items: ls.TextEdit[]) => code.TextEdit[] = defaultConverter.asTextEdits;
-export const asSignatureHelp: (item: ls.SignatureHelp) => code.SignatureHelp = defaultConverter.asSignatureHelp;
-export const asSignatureInformations: (items: ls.SignatureInformation[]) => code.SignatureInformation[] = defaultConverter.asSignatureInformations;
-export const asSignatureInformation: (item: ls.SignatureInformation) => code.SignatureInformation = defaultConverter.asSignatureInformation;
-export const asParameterInformations: (item: ls.ParameterInformation[]) => code.ParameterInformation[] = defaultConverter.asParameterInformations;
-export const asParameterInformation: (item: ls.ParameterInformation) => code.ParameterInformation = defaultConverter.asParameterInformation;
-export const asDefinitionResult: (item: ls.Definition) => code.Definition = defaultConverter.asDefinitionResult;
-export const asLocation: (item: ls.Location) => code.Location = defaultConverter.asLocation;
-export const asReferences: (values: ls.Location[]) => code.Location[] = defaultConverter.asReferences;
-export const asDocumentHighlights: (values: ls.DocumentHighlight[]) => code.DocumentHighlight[] = defaultConverter.asDocumentHighlights;
-export const asDocumentHighlight: (item: ls.DocumentHighlight) => code.DocumentHighlight = defaultConverter.asDocumentHighlight;
-export const asDocumentHighlightKind: (item: ls.DocumentHighlightKind) => code.DocumentHighlightKind = defaultConverter.asDocumentHighlightKind;
-export const asSymbolInformations: (values: ls.SymbolInformation[], uri?: code.Uri) => code.SymbolInformation[] = defaultConverter.asSymbolInformations;
-export const asSymbolInformation: (item: ls.SymbolInformation, uri?: code.Uri) => code.SymbolInformation = defaultConverter.asSymbolInformation;
-export const asCommand: (item: ls.Command) => code.Command = defaultConverter.asCommand;
-export const asCommands: (items: ls.Command[]) => code.Command[] = defaultConverter.asCommands;
-export const asCodeLens: (item: ls.CodeLens) => code.CodeLens = defaultConverter.asCodeLens;
-export const asCodeLenses: (items: ls.CodeLens[]) => code.CodeLens[] = defaultConverter.asCodeLenses;
-export const asWorkspaceEdit: (item: ls.WorkspaceEdit) => code.WorkspaceEdit = defaultConverter.asWorkspaceEdit;
-export const asDocumentLink: (item: ls.DocumentLink) => code.DocumentLink = defaultConverter.asDocumentLink;
-export const asDocumentLinks: (item: ls.DocumentLink[]) => code.DocumentLink[] = defaultConverter.asDocumentLinks;

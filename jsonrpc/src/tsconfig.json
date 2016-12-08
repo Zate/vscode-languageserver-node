@@ -1,12 +1,22 @@
 {
 	"compilerOptions": {
 		"target": "es5",
-		"module": "commonjs",
+		"module": "amd",
 		"moduleResolution": "node",
-		"sourceMap": false,
-		"declaration": true,
+		"sourceMap": true,
 		"stripInternal": true,
-		"lib": [ "es5", "es2015.promise" ],
-		"outDir": "../lib"
-	}
+		"lib": [ "es2015", "es2015.promise" ],
+		"declaration": true,
+		"outDir": "../lib",
+		"outFile": "../lib/main.js",
+		"strictNullChecks": true,
+		"noImplicitAny": false,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true
+	},
+    "exclude": [
+        "node_modules"
+    ]
 }
