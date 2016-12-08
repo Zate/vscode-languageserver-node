@@ -24,7 +24,7 @@ import {
 		RequestType, RequestType0, RequestHandler, RequestHandler0, GenericRequestHandler,
 		NotificationType, NotificationType0,
 		NotificationHandler, NotificationHandler0, GenericNotificationHandler,
-		MessageReader, IPCMessageReader, MessageWriter, IPCMessageWriter, Trace, Tracer, Event, Emitter
+		MessageReader, IPCMessageReader, MessageWriter, IPCMessageWriter, Trace, Tracer, Event, Emitter, DataCallback, PartialMessageInfo
 } from 'vscode-jsonrpc';
 
 import {
@@ -71,6 +71,10 @@ import { terminate } from './utils/processes';
 import { Delayer } from './utils/async'
 import * as UUID from './utils/uuid';
 
+export {
+		Message, DataCallback, PartialMessageInfo,
+		MessageReader, MessageWriter, Trace, Tracer, Event, Emitter
+};
 export {
 	ResponseError, InitializeError, ErrorCodes,
 	RequestType, RequestType0, RequestHandler, RequestHandler0, GenericRequestHandler,

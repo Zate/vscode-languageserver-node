@@ -17,7 +17,7 @@ import { Message, MessageType,
 	NotificationType5, NotificationType6, NotificationType7, NotificationType8, NotificationType9
 } from './messages';
 
-import { MessageReader, DataCallback, StreamMessageReader, IPCMessageReader } from './messageReader';
+import { MessageReader, PartialMessageInfo, DataCallback, StreamMessageReader, IPCMessageReader } from './messageReader';
 import { MessageWriter, StreamMessageWriter, IPCMessageWriter } from './messageWriter';
 import { Disposable, Event, Emitter } from './events';
 import { CancellationTokenSource, CancellationToken } from './cancellation';
@@ -30,7 +30,7 @@ export {
 	NotificationMessage, NotificationType,
 	NotificationType0, NotificationType1, NotificationType2, NotificationType3, NotificationType4,
 	NotificationType5, NotificationType6, NotificationType7, NotificationType8, NotificationType9,
-	MessageReader, DataCallback, StreamMessageReader, IPCMessageReader,
+	MessageReader, PartialMessageInfo, DataCallback, StreamMessageReader, IPCMessageReader,
 	MessageWriter, StreamMessageWriter, IPCMessageWriter,
 	CancellationTokenSource, CancellationToken,
 	Disposable, Event, Emitter
