@@ -79,7 +79,9 @@ export {
 	ResponseError, InitializeError, ErrorCodes,
 	RequestType, RequestType0, RequestHandler, RequestHandler0, GenericRequestHandler,
 	NotificationType, NotificationType0, NotificationHandler, NotificationHandler0, GenericNotificationHandler,
-	DocumentSelector, DocumentFilter
+
+	DocumentSelector, DocumentFilter,
+	DidOpenTextDocumentParams
 }
 export { Converter as Code2ProtocolConverter } from './codeConverter';
 export { Converter as Protocol2CodeConverter } from './protocolConverter';
