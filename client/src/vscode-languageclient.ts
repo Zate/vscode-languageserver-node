@@ -40,7 +40,7 @@ import {
 		ShowMessageNotification, ShowMessageParams, ShowMessageRequest,
 		TelemetryEventNotification,
 		DidChangeConfigurationNotification, DidChangeConfigurationParams,
-		DocumentSelector,
+		DocumentSelector, DocumentFilter,
 		DidOpenTextDocumentNotification, DidOpenTextDocumentParams,
 		DidChangeTextDocumentNotification, DidChangeTextDocumentParams, DidChangeTextDocumentOptions,
 		DidCloseTextDocumentNotification, DidCloseTextDocumentParams,
@@ -79,7 +79,7 @@ export {
 	ResponseError, InitializeError, ErrorCodes,
 	RequestType, RequestType0, RequestHandler, RequestHandler0, GenericRequestHandler,
 	NotificationType, NotificationType0, NotificationHandler, NotificationHandler0, GenericNotificationHandler,
-	DocumentSelector
+	DocumentSelector, DocumentFilter
 }
 export { Converter as Code2ProtocolConverter } from './codeConverter';
 export { Converter as Protocol2CodeConverter } from './protocolConverter';
