@@ -78,7 +78,8 @@ export {
 export {
 	ResponseError, InitializeError, ErrorCodes,
 	RequestType, RequestType0, RequestHandler, RequestHandler0, GenericRequestHandler,
-	NotificationType, NotificationType0, NotificationHandler, NotificationHandler0, GenericNotificationHandler
+	NotificationType, NotificationType0, NotificationHandler, NotificationHandler0, GenericNotificationHandler,
+	DocumentSelector
 }
 export { Converter as Code2ProtocolConverter } from './codeConverter';
 export { Converter as Protocol2CodeConverter } from './protocolConverter';
@@ -1537,102 +1538,104 @@ export class LanguageClient {
 
 	private _registeredHandlers: Map<string, FeatureHandler<DocumentOptions>> = new Map<string, FeatureHandler<DocumentOptions>>();
 	private initRegistrationHandlers(_connection: IConnection) {
+		// {"id":0,"result":{"capabilities":{"textDocumentSync":1,"hoverProvider":true,"definitionProvider":true,"referencesProvider":true,"documentSymbolProvider":true,"workspaceSymbolProvider":true}},"jsonrpc":"2.0"}"
+
 		const syncedDocuments: Map<string, TextDocument> = new Map<string, TextDocument>();
 		const logger = (type: RPCMessageType, error: any): void => { this.logFailedRequest(type, error); };
 		this._registeredHandlers.set(
 			DidOpenTextDocumentNotification.type.method,
 			new DidOpenTextDocumentFeature(this, syncedDocuments)
 		);
-		this._registeredHandlers.set(
-			DidChangeTextDocumentNotification.type.method,
-			new DidChangeTextDocumentFeature(this)
-		);
-		this._registeredHandlers.set(
-			WillSaveTextDocumentNotification.type.method,
-			new DocumentNotifiactions<WillSaveTextDocumentParams, TextDocumentWillSaveEvent>(
-				this, Workspace.onWillSaveTextDocument, WillSaveTextDocumentNotification.type,
-				(willSaveEvent) => this._c2p.asWillSaveTextDocumentParams(willSaveEvent),
-				(selectors, willSaveEvent) => DocumentNotifiactions.textDocumentFilter(selectors, willSaveEvent.document)
-		));
-		this._registeredHandlers.set(
-			WillSaveTextDocumentWaitUntilRequest.type.method,
-			new WillSaveWaitUntilFeature(this)
-		);
-		this._registeredHandlers.set(
-			DidSaveTextDocumentNotification.type.method,
-			new DocumentNotifiactions<DidSaveTextDocumentParams, TextDocument>(
-				this, Workspace.onDidSaveTextDocument, DidSaveTextDocumentNotification.type,
-				(textDocument) => this._c2p.asSaveTextDocumentParams(textDocument),
-				DocumentNotifiactions.textDocumentFilter
-		));
-		this._registeredHandlers.set(
-			DidCloseTextDocumentNotification.type.method,
-			new DidCloseTextDocumentFeature(this, syncedDocuments)
-		);
-		this._registeredHandlers.set(
-			CompletionRequest.type.method,
-			new LanguageFeature<CompletionOptions>((options) => this.createCompletionProvider(options))
-		);
-		this._registeredHandlers.set(
-			HoverRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createHoverProvider(options))
-		);
-		this._registeredHandlers.set(
-			SignatureHelpRequest.type.method,
-			new LanguageFeature<SignatureHelpOptions>((options) => this.createSignatureHelpProvider(options))
-		);
-		this._registeredHandlers.set(
-			DefinitionRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createDefinitionProvider(options))
-		);
-		this._registeredHandlers.set(
-			ReferencesRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createReferencesProvider(options))
-		);
-		this._registeredHandlers.set(
-			DocumentHighlightRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createDocumentHighlightProvider(options))
-		);
-		this._registeredHandlers.set(
-			DocumentSymbolRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createDocumentSymbolProvider(options))
-		);
-		this._registeredHandlers.set(
-			WorkspaceSymbolRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createWorkspaceSymbolProvider(options))
-		);
-		this._registeredHandlers.set(
-			CodeActionRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createCodeActionsProvider(options))
-		);
-		this._registeredHandlers.set(
-			CodeLensRequest.type.method,
-			new LanguageFeature<CodeLensOptions>((options) => this.createCodeLensProvider(options))
-		);
-		this._registeredHandlers.set(
-			DocumentFormattingRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createDocumentFormattingProvider(options))
-		);
-		this._registeredHandlers.set(
-			DocumentRangeFormattingRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createDocumentRangeFormattingProvider(options))
-		);
-		this._registeredHandlers.set(
-			DocumentOnTypeFormattingRequest.type.method,
-			new LanguageFeature<DocumentOnTypeFormattingOptions>((options) => this.createDocumentOnTypeFormattingProvider(options))
-		);
-		this._registeredHandlers.set(
-			RenameRequest.type.method,
-			new LanguageFeature<DocumentOptions>((options) => this.createRenameProvider(options))
-		);
-		this._registeredHandlers.set(
-			DocumentLinkRequest.type.method,
-			new LanguageFeature<DocumentLinkOptions>((options) => this.createDocumentLinkProvider(options))
-		);
-		this._registeredHandlers.set(
-			ExecuteCommandRequest.type.method,
-			new ExecuteCommandFeature(this, logger)
-		);
+		// this._registeredHandlers.set(
+		// 	DidChangeTextDocumentNotification.type.method,
+		// 	new DidChangeTextDocumentFeature(this)
+		// );
+			// this._registeredHandlers.set(
+			// 	WillSaveTextDocumentNotification.type.method,
+			// 	new DocumentNotifiactions<WillSaveTextDocumentParams, TextDocumentWillSaveEvent>(
+			// 		this, Workspace.onWillSaveTextDocument, WillSaveTextDocumentNotification.type,
+			// 		(willSaveEvent) => this._c2p.asWillSaveTextDocumentParams(willSaveEvent),
+			// 		(selectors, willSaveEvent) => DocumentNotifiactions.textDocumentFilter(selectors, willSaveEvent.document)
+			// ));
+			// this._registeredHandlers.set(
+			// 	WillSaveTextDocumentWaitUntilRequest.type.method,
+			// 	new WillSaveWaitUntilFeature(this)
+			// );
+			// this._registeredHandlers.set(
+			// 	DidSaveTextDocumentNotification.type.method,
+			// 	new DocumentNotifiactions<DidSaveTextDocumentParams, TextDocument>(
+			// 		this, Workspace.onDidSaveTextDocument, DidSaveTextDocumentNotification.type,
+			// 		(textDocument) => this._c2p.asSaveTextDocumentParams(textDocument),
+			// 		DocumentNotifiactions.textDocumentFilter
+			// ));
+		// this._registeredHandlers.set(
+		// 	DidCloseTextDocumentNotification.type.method,
+		// 	new DidCloseTextDocumentFeature(this, syncedDocuments)
+		// );
+			// this._registeredHandlers.set(
+			// 	CompletionRequest.type.method,
+			// 	new LanguageFeature<CompletionOptions>((options) => this.createCompletionProvider(options))
+			// );
+		// this._registeredHandlers.set(
+		// 	HoverRequest.type.method,
+		// 	new LanguageFeature<DocumentOptions>((options) => this.createHoverProvider(options))
+		// );
+			// this._registeredHandlers.set(
+			// 	SignatureHelpRequest.type.method,
+			// 	new LanguageFeature<SignatureHelpOptions>((options) => this.createSignatureHelpProvider(options))
+			// );
+		// this._registeredHandlers.set(
+		// 	DefinitionRequest.type.method,
+		// 	new LanguageFeature<DocumentOptions>((options) => this.createDefinitionProvider(options))
+		// );
+		// this._registeredHandlers.set(
+		// 	ReferencesRequest.type.method,
+		// 	new LanguageFeature<DocumentOptions>((options) => this.createReferencesProvider(options))
+		// );
+			// this._registeredHandlers.set(
+			// 	DocumentHighlightRequest.type.method,
+			// 	new LanguageFeature<DocumentOptions>((options) => this.createDocumentHighlightProvider(options))
+			// );
+		// this._registeredHandlers.set(
+		// 	DocumentSymbolRequest.type.method,
+		// 	new LanguageFeature<DocumentOptions>((options) => this.createDocumentSymbolProvider(options))
+		// );
+		// this._registeredHandlers.set(
+		// 	WorkspaceSymbolRequest.type.method,
+		// 	new LanguageFeature<DocumentOptions>((options) => this.createWorkspaceSymbolProvider(options))
+		// );
+			// this._registeredHandlers.set(
+			// 	CodeActionRequest.type.method,
+			// 	new LanguageFeature<DocumentOptions>((options) => this.createCodeActionsProvider(options))
+			// );
+			// this._registeredHandlers.set(
+			// 	CodeLensRequest.type.method,
+			// 	new LanguageFeature<CodeLensOptions>((options) => this.createCodeLensProvider(options))
+			// );
+			// this._registeredHandlers.set(
+			// 	DocumentFormattingRequest.type.method,
+			// 	new LanguageFeature<DocumentOptions>((options) => this.createDocumentFormattingProvider(options))
+			// );
+			// this._registeredHandlers.set(
+			// 	DocumentRangeFormattingRequest.type.method,
+			// 	new LanguageFeature<DocumentOptions>((options) => this.createDocumentRangeFormattingProvider(options))
+			// );
+			// this._registeredHandlers.set(
+			// 	DocumentOnTypeFormattingRequest.type.method,
+			// 	new LanguageFeature<DocumentOnTypeFormattingOptions>((options) => this.createDocumentOnTypeFormattingProvider(options))
+			// );
+			// this._registeredHandlers.set(
+			// 	RenameRequest.type.method,
+			// 	new LanguageFeature<DocumentOptions>((options) => this.createRenameProvider(options))
+			// );
+			// this._registeredHandlers.set(
+			// 	DocumentLinkRequest.type.method,
+			// 	new LanguageFeature<DocumentLinkOptions>((options) => this.createDocumentLinkProvider(options))
+			// );
+			// this._registeredHandlers.set(
+			// 	ExecuteCommandRequest.type.method,
+			// 	new ExecuteCommandFeature(this, logger)
+			// );
 	}
 
 	private handleRegistrationRequest(params: RegistrationParams): Thenable<void> {
