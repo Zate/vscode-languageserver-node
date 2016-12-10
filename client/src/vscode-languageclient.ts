@@ -1548,10 +1548,10 @@ export class LanguageClient {
 			DidOpenTextDocumentNotification.type.method,
 			new DidOpenTextDocumentFeature(this, syncedDocuments)
 		);
-		// this._registeredHandlers.set(
-		// 	DidChangeTextDocumentNotification.type.method,
-		// 	new DidChangeTextDocumentFeature(this)
-		// );
+		this._registeredHandlers.set(
+			DidChangeTextDocumentNotification.type.method,
+			new DidChangeTextDocumentFeature(this)
+		);
 			// this._registeredHandlers.set(
 			// 	WillSaveTextDocumentNotification.type.method,
 			// 	new DocumentNotifiactions<WillSaveTextDocumentParams, TextDocumentWillSaveEvent>(
@@ -1563,17 +1563,17 @@ export class LanguageClient {
 			// 	WillSaveTextDocumentWaitUntilRequest.type.method,
 			// 	new WillSaveWaitUntilFeature(this)
 			// );
-			// this._registeredHandlers.set(
-			// 	DidSaveTextDocumentNotification.type.method,
-			// 	new DocumentNotifiactions<DidSaveTextDocumentParams, TextDocument>(
-			// 		this, Workspace.onDidSaveTextDocument, DidSaveTextDocumentNotification.type,
-			// 		(textDocument) => this._c2p.asSaveTextDocumentParams(textDocument),
-			// 		DocumentNotifiactions.textDocumentFilter
-			// ));
-		// this._registeredHandlers.set(
-		// 	DidCloseTextDocumentNotification.type.method,
-		// 	new DidCloseTextDocumentFeature(this, syncedDocuments)
-		// );
+		this._registeredHandlers.set(
+			DidSaveTextDocumentNotification.type.method,
+			new DocumentNotifiactions<DidSaveTextDocumentParams, TextDocument>(
+				this, Workspace.onDidSaveTextDocument, DidSaveTextDocumentNotification.type,
+				(textDocument) => this._c2p.asSaveTextDocumentParams(textDocument),
+				DocumentNotifiactions.textDocumentFilter
+		));
+		this._registeredHandlers.set(
+			DidCloseTextDocumentNotification.type.method,
+			new DidCloseTextDocumentFeature(this, syncedDocuments)
+		);
 			// this._registeredHandlers.set(
 			// 	CompletionRequest.type.method,
 			// 	new LanguageFeature<CompletionOptions>((options) => this.createCompletionProvider(options))
