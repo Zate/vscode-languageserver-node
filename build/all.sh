@@ -1,47 +1,38 @@
 #!/bin/sh
 
 BUILD_FILES="find . -maxdepth 2 -mindepth 2 -type d -name node_modules -o -name lib"
-
-echo "########"
-echo "rm: node_modules/, lib/:" && ($BUILD_FILES)
+echo "rm: node_modules/, lib/:" `$BUILD_FILES | wc -l`
 ($BUILD_FILES) | xargs rm -fr
-echo "find: node_modules/, lib/:" && ($BUILD_FILES | wc -l)
-echo "########"
 
 ( \
-  echo "########" && \
   cd types && \
-  echo "`pwd`" && \
-  npm unlink  && \
-  npm install && \
+  echo `pwd` && \
+  npm unlink && \
+  npm install --silent && \
   npm run compile && \
-  npm link && \
-  echo "########" \
+  npm link \
 )
 
 ( \
-  echo "########" && \
   cd jsonrpc && \
-  echo "`pwd`" && \
+  echo `pwd` && \
   npm unlink  && \
   npm link "vscode-languageserver-types" && \
-  npm install && \
+  npm install --silent && \
   npm run compile && \
-  npm link && \
-  echo "########" \
+  npm link \
 )
 
 ( \
-  echo "########" && \
   cd client && \
-  echo "`pwd`" && \
-  npm unlink  && \
+  echo `pwd` && \
+  npm unlink && \
   npm link "vscode-jsonrpc" && \
   npm link "vscode-languageserver-types" && \
-  npm install && \
+  npm install --silent && \
+  npm run update-vscode && \
   npm run compile && \
-  npm link && \
-  echo "########" \
+  npm link \
 )
 
 # ( \
@@ -69,9 +60,9 @@ echo "########"
 #   echo "########" \
 # )
 
-( \
-  echo "########" && \
-  echo "find: node_modules/, lib/:" && \
-  ($BUILD_FILES) && \
-  echo "########" \
-)
+# ( \
+#   echo "########" && \
+#   echo "find: node_modules/, lib/:" && \
+#   ($BUILD_FILES) && \
+#   echo "########" \
+# )

@@ -14,10 +14,10 @@
 	"main": "./lib/main.js",
 	"typings": "./lib/main.d.ts",
 	"devDependencies": {
-		"mocha": "^2.4.5",
-		"typescript": "^2.0.10",
-		"@types/node": "^6.0.42",
-		"@types/mocha": "^2.2.32"
+		"mocha": "2.4.5",
+		"typescript": "2.0.10",
+		"@types/node": "6.0.42",
+		"@types/mocha": "2.2.32"
 	},
 	"scripts": {
 		"prepublish": "tsc -p ./src",
