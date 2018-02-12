@@ -20,7 +20,8 @@
 		"mocha": "3.0.2",
 		"typescript": "^2.0.10",
 		"@types/node": "^6.0.42",
-		"@types/mocha": "^2.2.32"
+		"@types/mocha": "^2.2.32",
+		"@types/lodash": "ts2.0"
 	},
 	"dependencies": {
 		"vscode-jsonrpc": "^3.0.1-alpha.5",
